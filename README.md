@@ -2,11 +2,13 @@
 Eyes for the Visually Impaired
 
 YOLO KISMI
+
 1 YOLO local image'lerden çalıştırılacak
 2 YOLO local videodan opencv ile frame okuyarak çalıştırılacak
 3 YOLO local videodan gstreamer ile frame okuyarak çalıştırılacak
 
 RBG2Depth KISMI
+
 4 RGB2Depth modelleri denenecek en iyisi bulunacak
 5 RGB2D modeli local image'lerden çalıştırılacak
 6 RGB2D modeli local videodan gstreamer ile frame okuyarak çalıştırılacak
@@ -15,6 +17,7 @@ RBG2Depth KISMI
 8 modellerin çıktıları rapordaki gibi formatlanacak
 
 LLM KISMI
+
 9 örnek çıktılarla prompt denemeleri yapılacak 
 10 LLM için OpenAI, Langchain, LLaMA gibi API'lar ve kütüphaneler test edilecek
 11 LLMden alınan çıktılar değerlendirilip en uygun çözüm projeye eklenecek
