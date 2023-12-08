@@ -49,7 +49,7 @@ print("Server: listening for connections...")
 
 
 
-video_path = './YOLO_test_videos/video1.webm'
+video_path = '/home/ai/E/clean/E1/e1_right_long.ts'
 cap = cv2.VideoCapture(video_path)
 if not cap.isOpened():
     print("Server: Error: Could not open video file.")
@@ -66,7 +66,6 @@ while True:
             ret, image = cap.read()
             if not ret:
                 break
-            image = cv2.resize(image, dsize=(224,224))
             send_image(connection, image, 0.01)
             
     finally:
