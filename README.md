@@ -1,6 +1,7 @@
 # EVI-AI
 Eyes for the Visually Impaired
 
+# TÜRKÇE:
 YOLO KISMI
 
 1 YOLO local image'lerden çalıştırılacak
@@ -29,8 +30,7 @@ Bundan sonra LLM'den alınan metin çıktısını telefona göndermek için webs
 
 Telefondan bilgisayara görüntü gönderme kısmı için önce kablolu bağlantılarla denemeler yapılıp elimizdeki sistemin çalışabilirliğini test edilecektir. Bütün kurulum tek bir sistem içerisinde çalışabilir hale geldiğinde kablosuz bağlantı ile görüntü gönderimi tamamlanıp sistem optimizasyonlarına başlanılacaktır.
 
-ENG
-
+# ENGLISH:
 YOLO PART
 
 1 YOLO will be run from local images 2 YOLO will be run by reading frames from local video with opencv 3 YOLO will be run by reading frames from local video with gstreamer

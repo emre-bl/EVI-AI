@@ -7,7 +7,3 @@ If there is an obstacle at right: obstacle at ___ meters ___ degrees right.
 If there is an obstacle in front: obstacle at ___ meters ___ ahead.
 
 Now I will provide you the outputs of this system for a sample scene and you will give clear instructions based on where are the obstacles and guide the user with short sentences, don’t output anything except requested output. Here is the captured information of the scene, output only a short sentence to summarize the situation.
-
-(1, 25, id=0)
-(2, -30, id=1)
-(7, 40, id=2)

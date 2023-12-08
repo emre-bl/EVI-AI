@@ -1,9 +1,7 @@
 import socket
-import random
 import time
 import pickle
 import cv2
-import json
 
 
 # Function to send image over the network
