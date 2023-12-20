@@ -3,70 +3,63 @@ import time
 import pickle
 import cv2
 
+# Function to get response over network
+def receive_response(conn):
+    response_data = ""
+    
+    while True: # Loop until the entire data is received
+        if 0 < len(response_data) < 4097:
+            print("senderSide: receiving response...")
+            
+        chunk = conn.recv(4096).decode()
+        if not chunk:
+            break
 
-# Function to send image over the network
-def send_image(conn, image, sleep_time):
-    image_data = pickle.dumps(image)
-    done_data = "DONE".encode()
-    data_to_send = image_data + done_data
+        response_data += chunk
+        if response_data[-16:] == "RECEIVERSIDEDONE":
+            print("senderSide: fully received response.")
+            response_data = response_data[:-16]
+            break
+    
+    return response_data
 
+# Function to send image and reveice the response over network
+def send_image_get_response(conn, image, sleep_time):
+    data_to_send = pickle.dumps(image) + "SENDERSIDEDONE".encode()
     conn.send(data_to_send)
     
-    print("Server: data sent, waiting for client response...")
-    response = conn.recv(1024).decode() # Wait for the client response
-    print("Server: received client response:", response)
+    print("senderSide: data sent, waiting for client response...")
+    response_data = receive_response(conn)
 
-    if response == "DONE":
-        print("Server: client processing is done, waiting", sleep_time, "seconds before next image.")
-        time.sleep(sleep_time)
+    print("senderSide: received client response:", response_data)
+    print("senderSide: client processing is done, waiting", sleep_time, "seconds before next image.")
+    time.sleep(sleep_time)
 
-
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a socket
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_address = ('localhost', 12345) # Bind the socket to a specific address and port
-
-while True:
-    try:
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a socket
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print("Server: double check the", server_address, "reconnect if any error happened.")
-        server_socket.bind(server_address)
-        break
-    except OSError as e:
-        print(e)
-        if e.errno == 98:  # Address already in use
-            print("Server:", server_address, "already in use. Closing the existing connection.")
-            server_socket.close()
-        else:
-            raise
+sender_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a socket
+sender_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sender_address = ('localhost', 12345) # Bind the socket to a specific address and port
+sender_socket.bind(sender_address)
 
 # Listen for incoming connections
-server_socket.listen(1)
+sender_socket.listen(1)
+print("senderSide: listening for connections...")
 
-print("Server: listening for connections...")
-
-
-
-video_path = '/home/ai/E/clean/E1/e1_right_long.ts'
-cap = cv2.VideoCapture(video_path)
+cap = cv2.VideoCapture('/home/ai/E/clean/E1/e1_right_long.ts')
 if not cap.isOpened():
-    print("Server: Error: Could not open video file.")
+    print("senderSide: Error: Could not open video file.")
+    sender_socket.close()    
     exit(0)
 
+print("senderSide: waiting for a connection...")
+connection, client_address = sender_socket.accept()
+print("senderSide: connection from", client_address)
 
-while True:
-    print("Server: waiting for a connection...")
-    connection, client_address = server_socket.accept()
-    
-    try:
-        print("Server: connection from", client_address)
-        while True:
-            ret, image = cap.read()
-            if not ret:
-                break
-            send_image(connection, image, 0.01)
-            
-    finally:
-        print("Server: terminating code.")
-        connection.close()
-        server_socket.close()
+try:
+    ret, image = cap.read()
+    while ret:
+        send_image_get_response(connection, image, 0.01)
+        ret, image = cap.read()          
+finally:
+    print("senderSide: terminating code.")
+    connection.close()
+    sender_socket.close()
