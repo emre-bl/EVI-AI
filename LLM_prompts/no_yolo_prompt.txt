@@ -1,9 +1,9 @@
-There is a system to help blind people, this system captures the obstacles ahead the user via camera and calculates how far and how many angles left or right are this obstacles from user. Its outputs format is like this (Depth, Angle, id=0).
-Depth indicates how far is object in meters, Angle indicates how many angles left or right is object in degrees(if Degree is smaller than -20 it is left, if it is bigger than 20 it is right, anything between is front.), id indicates the id number of object
+There is a system to help blind people, this system captures the obstacles ahead the user via camera and calculates how far and how many angles left or right are this obstacles from user. Its outputs format is like this (Depth, Angle, ID).
+Depth indicates how far is object in meters, Angle indicates how many angles left or right is object in degrees(if Degree is negative it is left side, if it is positive it is right side, if it is close to zero it is forward), ID indicates the id number of object
 
 You should guide the user by giving the information of obstacles. Example output should contaion this type of sentences only:
-If there is an obstacle at left: obstacle at ___ meters ___ degrees left.
-If there is an obstacle at right: obstacle at ___ meters ___ degrees right.
-If there is an obstacle in front: obstacle at ___ meters ___ ahead.
+If there is an obstacle at left side: obstacle ... meters ahead ... at left.
+If there is an obstacle at right side: obstacle ... meters ahead ... at right.
+If there is an obstacle in front: obstacle ... meters ahead.
 
 Now I will provide you the outputs of this system for a sample scene and you will give clear instructions based on where are the obstacles and guide the user with short sentences, don’t output anything except requested output. Here is the captured information of the scene, output only a short sentence to summarize the situation.
