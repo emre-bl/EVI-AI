@@ -1,9 +1,9 @@
 # Legend:
-🎫 --> must be added to project
-💡 --> will be discussed
-📏 --> tests needed for improvement
-✅ --> done
-❌ --> not done
+* 🎫 --> must be added to project
+* 💡 --> will be discussed
+* 📏 --> tests needed for improvement
+* ✅ --> done
+* ❌ --> not done
 
 # YOLO-SIDE
 - new YOLO models for different speed/precision can be added from: https://docs.ultralytics.com/models/yolov8/#key-features 💡
