@@ -24,6 +24,7 @@
 # ENTIRE CODE
 - whole pipeline must be merged together 🎫
 - comments should be added for clear coding 📏
+- feedback frequency can be decided by user such as once in 10 seconds, when manually triggered or ect. 💡
 
 # USER-SIDE-PIPELINE
 - 1-) capture the frame from camera ✅
