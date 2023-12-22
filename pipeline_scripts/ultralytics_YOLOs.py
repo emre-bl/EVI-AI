@@ -1,6 +1,9 @@
 import cv2
 
 def get_id_and_bbox(image, result, draw_rectangle = True, draw_label_text = True, threshold= 0.8):
+    """
+    gets a YOLO result and returns the ids and bounding boxes for images
+    """
     object_ids = []
     object_bboxes = []
     id_counter = 1
@@ -25,7 +28,9 @@ def get_id_and_bbox(image, result, draw_rectangle = True, draw_label_text = True
     return object_ids, object_bboxes
 
 def calculate_angles(image, result):
-    # list of objects center pixels offsets according to images center point
+    """
+    gets a YOLO result and returns detected images angles respect to camera --> (up/down angle, left/right angle)
+    """
     # negative: left/up
     # positive: right/down
     # X:row axis, determines how high or low an object is
@@ -41,6 +46,9 @@ def calculate_angles(image, result):
     return object_angles
 
 def get_angle_label_id_and_bboxes(model, img, threshold=0.7, draw_rectangle=False, draw_label_text=False):
+    """
+    gets a YOLO model and an image, returns detected images angles, labels, ids and bounding boxes
+    """
     result = model.predict(img)
     object_ids, object_bboxes = get_id_and_bbox(img, result, threshold=threshold, draw_rectangle=draw_rectangle, draw_label_text=draw_label_text)
     object_angles = calculate_angles(img, result)

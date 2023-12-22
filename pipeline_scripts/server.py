@@ -34,8 +34,10 @@ def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
         # return format is depth, angle, id, label --> (7, 40, id=2, "Table")
 
 # funtion to pass image to vision models
-
 def send_image_to_models(image):
+    """
+    send received image to first YOLO and then DEPTH model, merges outputs of models and returns
+    """
     YOLO_out, bboxes = yolo_pass(yolo_model, image)
     return (YOLO_out, YOLO_out)
     DEPTH_out = depth_pass(depth_model, image, YOLO_out, bboxes, 0.7)
@@ -45,6 +47,13 @@ def send_image_to_models(image):
 
 
 def generate_prompt(YOLO_and_DEPTH_out):
+    """
+    gets outputs of YOLO and DEPTH model and merges them into one list of information about obstacles in scene
+    """
+    # TODO: GENERATE THE PROMPT FROM YOLO AND DEPTH MODEL OUTPUTS
+    # MERGE THEM IN WANTED ORDER
+    # READ THE READY PROMPTS FROM "LLM_prompts" directorty and return result prompt
+
     if len(YOLO_and_DEPTH_out[0]) != 0:
         # YOLO detected something
         blocked_angles = [[way for way in ways.keys() if blocked_way in way][0] for blocked_way in [info[0][1] for info in YOLO_and_DEPTH_out[0]]]
@@ -53,18 +62,16 @@ def generate_prompt(YOLO_and_DEPTH_out):
         # YOLO detected nothing
         available_ways = []
     return str(YOLO_and_DEPTH_out)
-    # TODO: GENERATE THE PROMPT ACCORDING TO YOLO AND DEPTH MODEL OUTPUTS
-    # READ THE READY PROMPTS FROM "LLM_prompts" directorty and return result prompt
+
 
 # Function to pass vision models output to LLM API
-
 def LLM_pass(prompt):
     return prompt
     LLM_out = LLM_model(prompt)
     return LLM_out
 
-# Function to receive image data
 
+# Function to receive image data
 def get_image_data():
     image_data = b""
     

@@ -28,6 +28,8 @@ def send_image_get_response(conn, image):
     response_data = receive_response(conn)
     print(response_data)
 
+# function to set image sending frequency
+# >0:wait, 0:send manual, other:realtime
 def wait_delay(WAIT_SECONDS):
     if WAIT_SECONDS > 0:
         time.sleep(WAIT_SECONDS)
@@ -53,12 +55,13 @@ if not cap.isOpened():
     sender_socket.close()    
     exit(0)
     
-WAIT_SECONDS = 3 # >0:waitseconds, 0:manual, other:waitsecond
+WAIT_SECONDS = 3
 try:
     ret, image = cap.read()
     while ret:
         send_image_get_response(connection, image)
         wait_delay(WAIT_SECONDS)
+        
         for _ in range(BUFFER_SIZE + 1):
             # throw stacked past images and get current image
             ret, image = cap.read()          

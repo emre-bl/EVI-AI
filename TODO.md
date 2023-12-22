@@ -23,7 +23,6 @@
 
 # ENTIRE CODE
 - whole pipeline must be merged together 🎫
-- comments should be added for clear coding 📏
 
 # USER-SIDE-PIPELINE
 - 1-) capture the frame from camera ✅
