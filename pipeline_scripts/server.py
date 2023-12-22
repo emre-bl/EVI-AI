@@ -83,6 +83,7 @@ def get_image_data():
 
     # Deserialize the image using pickle
     image = pickle.loads(image_data)
+    image = cv2.resize(image, (image.shape[0]*2, image.shape[1]*2))
     return image
 
 
@@ -97,6 +98,7 @@ try:
         image = get_image_data()
         cv2.imshow("reveived_image", image)
         cv2.waitKey(1)
+
         YOLO_and_DEPTH_out = send_image_to_models(image)
 
         prompt = generate_prompt(YOLO_and_DEPTH_out)
