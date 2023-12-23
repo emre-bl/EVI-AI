@@ -7,6 +7,7 @@
 
 # YOLO-SIDE
 - new YOLO models for different speed/precision can be added from: https://docs.ultralytics.com/models/yolov8/#key-features 💡
+- different verbose types(drawing bounding boxes or showing available ways) can be added 💡
 
 # LLM-SIDE
 - Local LLM testing must done 🎫
@@ -18,17 +19,19 @@
 - 2 depth models(one for cityscapes one for indoors) should be included in app, model selection will be left to user. 📏
 
 # RTSP-SIDE
-- objects can de sent as json objects 💡
+- images can be sent as json objects 💡
+- images can sent in base64 💡
 - problem with already open connections must be solved 🎫
 
 # ENTIRE CODE
 - whole pipeline must be merged together 🎫
+- text-to-speech can be better, maybe it will work better in phone 💡
 
 # USER-SIDE-PIPELINE
 - 1-) capture the frame from camera ✅
 - 2-) send the captured frame to server ✅
 - 3-) wait for servers response ✅
-- 4-) give audio feedback to user ❌
+- 4-) give audio feedback to user in all languages❌
 
 # APP-SIDE-PIPELINE
 - 1-) wait for images from user ✅
