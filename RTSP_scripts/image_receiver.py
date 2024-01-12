@@ -21,6 +21,7 @@ def get_image_data():
 
     # Deserialize the image using pickle
     image = pickle.loads(image_data)
+    image = cv2.resize(image, (image.shape[0]*2, image.shape[1]*2))
     return image
 
 
