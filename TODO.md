@@ -20,12 +20,16 @@
 
 # RTSP-SIDE
 - images can be sent as json objects 💡
+- additional information(original image size, YOLO version, DEPTH model type etc.) about pipeline usage must be sent also 🎫
 - images can sent in base64 💡
 - problem with already open connections must be solved 🎫
 
 # ENTIRE CODE
+- temporary function importing must be added for image receiving functions 🎫
+- functions must be imported from their original path 🎫
 - whole pipeline must be merged together 🎫
 - text-to-speech can be better, maybe it will work better in phone 💡
+- whole code should be able to controlled via yaml file 💡
 
 # USER-SIDE-PIPELINE
 - 1-) capture the frame from camera ✅
