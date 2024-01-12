@@ -1,32 +1,8 @@
 import socket
-import pickle
 import cv2
 import time
 
-# Function to get response over network
-def receive_response(conn):
-    response_data = ""
-    
-    while True: # Loop until the entire data is received            
-        chunk = conn.recv(4096).decode()
-        if not chunk:
-            break
-
-        response_data += chunk
-        if response_data[-16:] == "RECEIVERSIDEDONE":
-            response_data = response_data[:-16]
-            break
-    
-    return response_data
-
-# Function to send image and reveice the response over network
-def send_image_get_response(conn, image):
-    image = cv2.resize(image, (image.shape[0]//2,image.shape[1]//2))
-    data_to_send = pickle.dumps(image) + "SENDERSIDEDONE".encode()
-    conn.send(data_to_send)
-    
-    response_data = receive_response(conn)
-    print(response_data)
+from image_sender import send_image_get_response
 
 # function to set image sending frequency
 # >0:wait, 0:send manual, other:realtime
