@@ -26,7 +26,7 @@
 
 # ENTIRE CODE
 - temporary function importing must be added for image receiving functions 🎫
-- functions must be imported from their original path 🎫
+- functions must be imported from their relative path to user.py and server.py 🎫
 - whole pipeline must be merged together 🎫
 - text-to-speech can be better, maybe it will work better in phone 💡
 - whole code should be able to controlled via yaml file 💡
