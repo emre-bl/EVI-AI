@@ -45,7 +45,7 @@ def send_image_to_models(image):
     merged_output = (YOLO_out, DEPTH_out)
     return merged_output
 
-
+# generates prompt by merging infos from models outputs
 def generate_prompt(YOLO_and_DEPTH_out):
     """
     gets outputs of YOLO and DEPTH model and merges them into one list of information about obstacles in scene
