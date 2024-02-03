@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'API.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,7 +7,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+  
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -56,6 +56,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String url = 'http://127.0.0.1:5000/api';
   //int _counter = 0;
 
   //void _incrementCounter() {
@@ -64,7 +65,11 @@ class _MyHomePageState extends State<MyHomePage> {
     //});
   //}
 
-  Future<void> callPythonScript() async {
+  /*Future callPythonScript(Url) async {
+    http.Response Response = await http.get(Url);
+    return Response.body;
+  }*/
+  /*Future<void> callPythonScript() async {
     // Replace with the URL of your backend server
     var url = Uri.parse('https://github.com/emre-bl/EVI-AI/blob/main/pipeline_scripts/user.py');
 
@@ -79,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error calling the backend server: $e');
     }
-  }
+  }*/
 
 
   @override
@@ -95,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(16.0), // Add some padding around the button
             child: ElevatedButton(
               onPressed: () {
-                callPythonScript();
+                runUser(Uri.parse(url));
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, double.infinity), // Set the button size to as big as its parent allows
