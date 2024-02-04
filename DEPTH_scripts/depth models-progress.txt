@@ -1,0 +1,20 @@
+Sources:
+https://paperswithcode.com/task/monocular-depth-estimation
+https://paperswithcode.com/task/depth-estimation
+https://paperswithcode.com/task/depth-estimation/codeless
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6386885/
+https://keras.io/examples/vision/depth_estimation/
+https://stereolabs.medium.com/depth-tracking-and-detection-in-computer-vision-using-rgb-images-7647e0d04237
+
+İNDİRDİM:
+https://github.com/shariqfarooq123/AdaBins -- took :10.16916012763977s - Pytorch
+https://github.com/mrharicot/monodepth  -- CNN - tf1 is used, source code must be changed
+https://github.com/nianticlabs/monodepth2 -- Pytorch - depth bilgisi numpy array olarak kaydediliyor (hazır)
+https://github.com/Brummi/BehindTheScenes -- dependency issues
+https://github.com/SysCV/idisc -- installation issues
+
+For future research:
+https://github.com/compphoto/BoostingMonocularDepth
+https://github.com/compphoto/BoostYourOwnDepth
+
+
