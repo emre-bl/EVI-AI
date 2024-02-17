@@ -30,6 +30,11 @@ Bundan sonra LLM'den alınan metin çıktısını telefona göndermek için webs
 
 Telefondan bilgisayara görüntü gönderme kısmı için önce kablolu bağlantılarla denemeler yapılıp elimizdeki sistemin çalışabilirliğini test edilecektir. Bütün kurulum tek bir sistem içerisinde çalışabilir hale geldiğinde kablosuz bağlantı ile görüntü gönderimi tamamlanıp sistem optimizasyonlarına başlanılacaktır.  
 
+Mobil Uygulama Backend Bağlantısı  
+
+12 Butona basıldığında user.py çalıştırmalı  
+13 text to speech, chatgpt'den alınan son response direkt olarak uygulamadan ses ile iletilmeli  
+
 # ENGLISH:  
 YOLO PART  
 
@@ -57,3 +62,8 @@ After the YOLO, RBG2Depth and LLM parts can be run separately as desired, first 
 After that, a simple working system will be set up with websocket setup to send the text output from the LLM to the phone. And after it is seen that it works as desired, the part of transmitting the text sent from the computer as auditory feedback will be completed by using the text-to-speech operation of the phone.  
 
 For the part of sending images from the phone to the computer, we will first test the operability of the system we have by experimenting with wired connections. When the whole installation becomes operable in a single system, image sending will be completed with wireless connection and system optimisations will be started.  
+
+Mobile App Backend Connection  
+
+12 App should be running user.oy when Start button is pressed  
+13 The last response from LLM must send it to application and with text to speech, the app should run the audio in real time
