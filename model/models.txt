@@ -1,0 +1,8 @@
+realsense
+
+OpenCV with DepthAI
+
+ZED SDK
+
+MonoDepth and its successors (e.g., MonoDepth2) are neural networks designed for monocular depth estimation, which infer the depth information from a single camera input. While originally not optimized for mobile devices, these models can be adapted and optimized for mobile deployment, potentially in combination with a lightweight object detection model like MobileNet or SqueezeNet.
+
