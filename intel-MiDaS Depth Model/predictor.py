@@ -22,33 +22,6 @@ class DepthEstimationModel:
         print("Model initialized.")
         return model
     
-    """
-    def _mask_and_save_nearest_object(self, depth_numpy, output_path = "output.png"):
-    
-        min_depth = depth_numpy.min()
-        min_depth_index = np.where(depth_numpy == min_depth)
-        min_depth_x, min_depth_y = min_depth_index[1][0], min_depth_index[0][0]
-
-        # Flood fill algorithm to segment the nearest object (optional)
-        if hasattr(self, "flood_fill"):  # Check if user-defined flood fill exists
-            depth_numpy = self.flood_fill(depth_numpy, min_depth_x, min_depth_y)
-
-        # Create a binary mask where only values close to the minimum depth are kept
-        threshold = 0.2
-        mask = np.zeros_like(depth_numpy)
-        mask[depth_numpy >= min_depth - threshold] = 1
-
-        # Apply the mask to the depth map
-        masked_depth = depth_numpy * mask
-
-        # Convert to binary image (255 for nearest object, 0 for background)
-        binary_image = (masked_depth * 255).astype(np.uint8)
-
-        # Save the binary image
-        Image.fromarray(binary_image, mode="L").save(output_path)
-        print(f"Image saved to {output_path}.")
-    """
-    
 
     def save_colored_depth(self, depth_numpy, output_path):
         colored = colorize(depth_numpy)
@@ -56,6 +29,8 @@ class DepthEstimationModel:
 
     def get_nearest_object_position(self, depth_numpy): 
         min_depth = depth_numpy.min() # Depth haritasındaki en küçük değeri bulun
+        print("Min depth  : " , min_depth)
+        print("Max depth  : " , depth_numpy.max())
         
         min_depth_index = np.where(depth_numpy == min_depth) # En yakın nesnenin konumunu bulmak için minimum derinliğin indeksini alın
         image_width = depth_numpy.shape[1] # Görüntünün genişliğini alın
@@ -74,17 +49,37 @@ class DepthEstimationModel:
             return "Hafif Sağ"
         else:
             return "Karşı"
+        
+    def make_image_3_4(self, image):
+        width, height = image.size
+        if width > height:
+            new_width = 4 * height // 3
+            left = (width - new_width) // 2
+            right = width - left
+            image = image.crop((left, 0, right, height))
+        else:
+            new_height = 3 * width // 4
+            top = (height - new_height) // 2
+            bottom = height - top
+            image = image.crop((0, top, width, bottom))
+        return image
     
 
     def calculate_depthmap(self, image_path, output_path):
+        print("Calculating depth map for", image_path, "...")
         image = Image.open(image_path).convert("RGB")
+        image = self.make_image_3_4(image)
+        depth_numpy = self.model.infer_pil(image)
+        """
         image = self.reduce_image_size(image)
         depth_numpy = self.model.infer_pil(image)
-        depth_numpy = depth_numpy[0: (4*depth_numpy.shape[0]//5), :]
+        depth_numpy = depth_numpy[0: (3*depth_numpy.shape[0]//4), :]        
         depth_numpy = (depth_numpy - depth_numpy.min()) / (depth_numpy.max() - depth_numpy.min())
         self.save_colored_depth(depth_numpy, output_path + "_full.png")
         depth_numpy[depth_numpy < 0.1] = 0
         depth_numpy[depth_numpy >= 0.1] = 1
+        """
+        
         self.save_colored_depth(depth_numpy, output_path)
         print(self.get_nearest_object_position(depth_numpy))
 
@@ -100,8 +95,10 @@ class DepthEstimationModel:
     
     
 model = DepthEstimationModel()
-model.calculate_depthmap("./test_images/test7.png", "./outputs/output7.png")
-model.calculate_depthmap("./test_images/test6.png", "./outputs/output6.png")
+for i in range(1,12):
+    model.calculate_depthmap(f"test_images/test{i}.png", f"outputs/{i}_depth.png")
+    print("------------------------------------------------------")
+
 
 #Model ilk çalışırken biraz zaman alıyor. Ancak sonra çok seri okuyup işlem yapıyor.
 
