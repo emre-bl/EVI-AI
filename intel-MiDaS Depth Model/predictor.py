@@ -95,6 +95,7 @@ class DepthEstimationModel:
     
 
     def calculate_depthmap(self, image_path, output_path):
+        print("Device:", self.device)
         print("Calculating depth map for", image_path, "...")
         
         image = Image.open(image_path).convert("RGB")
