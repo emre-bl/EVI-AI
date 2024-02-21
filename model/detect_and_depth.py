@@ -49,7 +49,7 @@ yolo_model = YOLO("yolov8n.pt")
 #monodepth_model = torch.hub.load("nianticlabs/monodepth2", "monodepth2", trust_repo=True)
 
 # MonoDepth2
-checkpoint = torch.load('C:/GitHub/EVI-AI/model/mono_640x192/encoder.pth', map_location=torch.device('cpu'))
+checkpoint = torch.load('mono_640x192/encoder.pth', map_location=torch.device('cpu'))
 encoder = ResnetEncoder(num_layers=18, pretrained=False)
 
 if 'state_dict' in checkpoint:
