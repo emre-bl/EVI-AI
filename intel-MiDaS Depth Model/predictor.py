@@ -1,5 +1,6 @@
+import time
 import torch
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from misc import colorize
 import numpy as np
 
@@ -24,8 +25,36 @@ class DepthEstimationModel:
     
 
     def save_colored_depth(self, depth_numpy, output_path):
+        # Derinlik haritasını renklendir
         colored = colorize(depth_numpy)
-        Image.fromarray(colored).save(output_path)
+        image = Image.fromarray(colored)
+
+        # ImageDraw ve ImageFont objelerini oluştur
+        draw = ImageDraw.Draw(image)
+
+        try:
+            # Daha büyük ve özel bir font kullan (örneğin 20 piksel boyutunda)
+            font = ImageFont.truetype("arial.ttf", 20)  # Sisteminizdeki bir font dosyasını kullanabilirsiniz
+        except IOError:
+            # Belirtilen font bulunamazsa veya yüklenemezse varsayılan fontu kullan
+            font = ImageFont.load_default()
+
+        # Derinlik değerlerini eşit aralıklarla işaretle
+        intervals = np.linspace(0, depth_numpy.size, 33, endpoint=False, dtype=int)  # 32 eşit aralık
+        for i in range(1, len(intervals)):
+            start_index = intervals[i-1]
+            end_index = intervals[i]
+            middle_index = (start_index + end_index) // 2
+
+            # Düz 1D dizine dönüştür ve orta indeksi hesapla
+            flat_index = np.unravel_index(middle_index, depth_numpy.shape)
+            depth_value = depth_numpy[flat_index]
+
+            # Derinlik değerini yazdır
+            draw.text((flat_index[1], flat_index[0]), f"{depth_value:.2f}", fill="white", font=font)
+
+        # İşaretlenmiş görüntüyü kaydet
+        image.save(output_path)
 
     def get_nearest_object_position(self, depth_numpy): 
         min_depth = depth_numpy.min() # Depth haritasındaki en küçük değeri bulun
@@ -67,27 +96,21 @@ class DepthEstimationModel:
 
     def calculate_depthmap(self, image_path, output_path):
         print("Calculating depth map for", image_path, "...")
+        
         image = Image.open(image_path).convert("RGB")
         image = self.make_image_3_4(image)
-        depth_numpy = self.model.infer_pil(image)
-        """
         image = self.reduce_image_size(image)
-        depth_numpy = self.model.infer_pil(image)
-        depth_numpy = depth_numpy[0: (3*depth_numpy.shape[0]//4), :]        
-        depth_numpy = (depth_numpy - depth_numpy.min()) / (depth_numpy.max() - depth_numpy.min())
-        self.save_colored_depth(depth_numpy, output_path + "_full.png")
-        depth_numpy[depth_numpy < 0.1] = 0
-        depth_numpy[depth_numpy >= 0.1] = 1
-        """
         
+        start = time.time()
+        depth_numpy = self.model.infer_pil(image)
+        end = time.time()
+        print("Depth map calculated. Time:", end - start, "seconds.")
         self.save_colored_depth(depth_numpy, output_path)
         print(self.get_nearest_object_position(depth_numpy))
 
     def reduce_image_size(self, image): # bunu hızlandırmak için ekledim. silinebilir.
         width, height = image.size
-        new_width = width // 4
-        new_height = height // 4
-        return image.resize((new_width, new_height))
+        return image.resize((width // 4, height // 4))
     
     def mirror_image(self, image): # get_nearest_object_position fonksiyonunu test etmek için ekledim. 
         return image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -95,7 +118,7 @@ class DepthEstimationModel:
     
     
 model = DepthEstimationModel()
-for i in range(1,12):
+for i in range(1,5):
     model.calculate_depthmap(f"test_images/test{i}.png", f"outputs/{i}_depth.png")
     print("------------------------------------------------------")
 
