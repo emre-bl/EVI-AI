@@ -68,17 +68,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void playStartSound() async {
-    await audioPlayer.play(AssetSource('start_sound.mp3')); // Play the start sound
-    audioPlayer.onPlayerComplete.listen((event) {
-      if (shouldPlayStartSound) {
-        playStartSound(); // Replay the sound if the flag is still true
-      }
-    });
-  }
+  await audioPlayer.play(AssetSource('start_sound.mp3')); // Play the start sound
+  audioPlayer.onPlayerComplete.listen((event) async { // Mark the callback as 'async'
+    if (shouldPlayStartSound) {
+      // This await is inside an async callback, so it's okay
+      await Future.delayed(Duration(seconds: 1)); // Wait for one second
+      playStartSound(); // Replay the sound after the delay
+    }
+  });
+}
 
   void playSound() async {
     if (!shouldPlayStartSound) { // Check if we should play the sound
-      await audioPlayer.play(AssetSource('output.mp3')); // Your periodic sound file
+      await audioPlayer.play(AssetSource('LLM_output.mp3')); // Your periodic sound file
     }
   }
 
