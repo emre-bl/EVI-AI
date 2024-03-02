@@ -1,44 +1,71 @@
 import socket
-import pickle
+import json
 import cv2
+import numpy as np
+import base64
 
-# Function to receive image data
-def get_image_data():
-    image_data = b""
+def send_data(client_socket, response_data, end=1):
+    response_json_dict = {"data": response_data, "end": end}
+    # end:-1->close socket, 0->message not ended: 1->message ended
     
-    while True: # Loop until the entire data is received            
-        chunk = receiver_socket.recv(4096)
-        if not chunk:
+    # print("sent", response_json_dict)
+    response_json_data = json.dumps(response_json_dict)
+    client_socket.send(response_json_data.encode())
+
+    return response_json_dict["end"] == -1
+
+def get_data(client_socket):
+    whole_data = ""
+
+    while True:
+        message_json_data = client_socket.recv(4096).decode()
+        whole_data = whole_data + message_json_data
+        if "\"end\": 1}" in whole_data:
+            break
+        if "\"end\": -1}" in whole_data:
             break
 
-        image_data += chunk
-        if image_data[-14:] == "SENDERSIDEDONE".encode():
-            image_data = image_data[:-14]
-            break
+    message_json_dict = json.loads(whole_data)
+    return message_json_dict
 
-    if not image_data:
-        raise Exception("no image data")
+def process_data(json_dict):
+    # print("received:", json_dict)
+    if json_dict["end"] == 1:
+        image = base64_to_image(json_dict["data"])
+        image = cv2.resize(image, json_dict["original_size"])
+        json_dict["image"] = image
+        return False
+    if json_dict["end"] == -1:
+        # closing the connection beacuse client said end=-1
+        return True
 
-    # Deserialize the image using pickle
-    image = pickle.loads(image_data)
-    image = cv2.resize(image, (image.shape[0]*2, image.shape[1]*2))
+def base64_to_image(base64_string):
+    buffer = base64.b64decode(base64_string)
+    image = cv2.imdecode(np.frombuffer(buffer, dtype=np.uint8), -1)
     return image
 
 
-# Create a socket
-receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+if __name__ == "__main__":
+    # Define server address and port
+    SERVER_HOST = '0.0.0.0'  # This allows connections from any network interface
+    SERVER_PORT = 12345
 
-# Connect to the server
-server_address = ('localhost', 12345)
-receiver_socket.connect(server_address)
-
-try:
-    while True:
-        image = get_image_data()
-        cv2.imshow("receier_image", image)
-        cv2.waitKey(1)
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a TCP/IP socket
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind((SERVER_HOST, SERVER_PORT)) # Bind the socket to the address and port
     
-        receiver_socket.send("RECEIVERSIDEDONE".encode())
-finally:
-    cv2.destroyAllWindows()
-    receiver_socket.close()
+    while True:
+        server_socket.listen(1) # Listen for incoming connections
+        client_socket, client_address = server_socket.accept() # wait and accept incoming connection 
+
+        while True:
+            message_json_dict = get_data(client_socket)
+            closed = process_data(message_json_dict)
+            if closed:
+                break
+            closed = send_data(client_socket, "response")
+            if closed:
+                break
+            continue
+
+        client_socket.close()
