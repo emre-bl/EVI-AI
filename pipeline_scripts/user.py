@@ -28,7 +28,7 @@ if not cap.isOpened():
 client_socket.connect((SERVER_HOST, SERVER_PORT))
 
 while True:
-    for _ in range(BUFFER_SIZE+1):
+    for _ in range(BUFFER_SIZE+2):
         ret, image = cap.read()
     original_size = image.shape
     image = cv2.resize(image, (448, 448))
