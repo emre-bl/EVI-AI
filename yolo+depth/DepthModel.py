@@ -26,48 +26,8 @@ class DepthEstimationModel:
     def save_colored_depth(self, depth_numpy, output_path):
         colored = colorize(depth_numpy)
         image = Image.fromarray(colored)
-
-        draw = ImageDraw.Draw(image)
-
-        try:
-            font = ImageFont.truetype("arial.ttf", 20)  
-        except IOError:
-            font = ImageFont.load_default()
-
-        intervals = np.linspace(0, depth_numpy.size, 33, endpoint=False, dtype=int)  # 32 eşit aralık
-        for i in range(1, len(intervals)):
-            start_index = intervals[i-1]
-            end_index = intervals[i]
-            middle_index = (start_index + end_index) // 2
-
-            flat_index = np.unravel_index(middle_index, depth_numpy.shape)
-            depth_value = depth_numpy[flat_index]
-
-            draw.text((flat_index[1], flat_index[0]), f"{depth_value:.2f}", fill="white", font=font)
         image.save(output_path)
 
-    def get_nearest_object_position(self, depth_numpy): 
-        min_depth = depth_numpy.min() # Depth haritasındaki en küçük değeri bulun
-        print("Min depth  : " , min_depth)
-        print("Max depth  : " , depth_numpy.max())
-        
-        min_depth_index = np.where(depth_numpy == min_depth) # En yakın nesnenin konumunu bulmak için minimum derinliğin indeksini alın
-        image_width = depth_numpy.shape[1] # Görüntünün genişliğini alın
-        image_center_x = image_width // 2 # Görüntünün yatay (x) merkezini hesaplayın
-        nearest_object_x = min_depth_index[1][0] # En yakın nesnenin x (yatay) konumunu alın
-        
-        quarter = image_width // 4 # Görüntünün genişliğinin dörtte birini hesaplayın
-
-        if nearest_object_x < image_center_x - quarter: # Nesnenin konumuna göre sol, hafif sol, karşı, hafif sağ veya sağ olduğunu belirleyin
-            return "Sol"
-        elif nearest_object_x < image_center_x:
-            return "Hafif Sol"
-        elif nearest_object_x > image_center_x + quarter:
-            return "Sağ"
-        elif nearest_object_x > image_center_x:
-            return "Hafif Sağ"
-        else:
-            return "Karşı"
         
     def make_image_3_4(self, image):
         width, height = image.size
@@ -87,7 +47,6 @@ class DepthEstimationModel:
     def calculate_depthmap(self, pil_image, output_path): 
         image = pil_image.convert("RGB")
         image = self.make_image_3_4(image)
-        image = self.reduce_image_size(image)
         depth_numpy = self.model.infer_pil(image)
         self.save_colored_depth(depth_numpy, output_path)
         return depth_numpy

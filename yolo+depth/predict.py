@@ -49,4 +49,4 @@ def combined_predictor(image_path):
     cv2.destroyAllWindows()
 
 # Example usage
-combined_predictor('test2.png')
+combined_predictor('test6.png')
