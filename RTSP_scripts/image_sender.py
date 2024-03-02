@@ -4,6 +4,19 @@ import cv2
 import base64
 
 def send_data(client_socket, message_data, original_size, end=1):
+    """sends text data over internet
+
+    Args:
+        client_socket (socket): socket to send data to
+        message_data (str): text data to send to client_socket
+        original_size (tuple): _size of image to send
+        end (int, optional): 1 means keep the connection open, -1 means close the socket. Defaults to 1.
+
+
+    Returns:
+        bool: True means connection is closed False means connection is left open
+    """
+
     message_json_dict = {"data": message_data, "original_size": (original_size[1], original_size[0]), "end": end}    
     # end:-1->close socket, 0->message not ended: 1->message ended
 
@@ -14,6 +27,14 @@ def send_data(client_socket, message_data, original_size, end=1):
     return message_json_dict["end"] == -1
 
 def get_data(client_socket):
+    """retrieves data from socket
+
+    Args:
+        client_socket (socket): socket to listen for data
+
+    Returns:
+        dict: dictionary from retrieved json data
+    """
     whole_data = ""
 
     while True:
@@ -28,7 +49,15 @@ def get_data(client_socket):
     return response_json_dict
 
 def process_data(json_dict):
-    print("received:", json_dict)
+    """processes retrieved dictionary data
+
+    Args:
+        json_dict (dict): dictionary that contains information about data
+
+    Returns:
+        bool: True means connection is closed False means connection is left open
+    """
+    # print("received:", json_dict)
     if json_dict["end"] == 1:
         return False
     if json_dict["end"] == -1:
@@ -36,6 +65,14 @@ def process_data(json_dict):
         return True
 
 def image_to_base64(image):
+    """converts image to base64 format
+
+    Args:
+        image (numpy.ndarray): image to turn to base64
+
+    Returns:
+        str: image in base64 format
+    """
     _, buffer = cv2.imencode('.png', image)
     return base64.b64encode(buffer).decode()
 
@@ -47,8 +84,9 @@ if __name__ == "__main__":
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    # open a camera connection to get images from
     cap = cv2.VideoCapture(0)
-    BUFFER_SIZE = 1
+    BUFFER_SIZE = 1 # how many frames should captured in queue
     cap.set(cv2.CAP_PROP_BUFFERSIZE, BUFFER_SIZE)
     if not cap.isOpened():
         exit(0)
@@ -56,7 +94,7 @@ if __name__ == "__main__":
     client_socket.connect((SERVER_HOST, SERVER_PORT))
 
     while True:
-        for _ in range(BUFFER_SIZE+1):
+        for _ in range(BUFFER_SIZE+1): # emptying the queue for getting newly captured image
             ret, image = cap.read()
         original_size = image.shape
         image = cv2.resize(image, (448, 448))
