@@ -2,7 +2,8 @@ import socket
 import cv2
 import time
 
-from image_sender import send_image_get_response
+# TODO: IMPORT FROM RELATIVE PATH
+from image_sender import *
 
 # function to set image sending frequency
 # >0:wait, 0:send manual, other:realtime
@@ -14,34 +15,36 @@ def wait_delay(WAIT_SECONDS):
     else:
         pass
 
+# Define server address and port
+SERVER_HOST = '0.0.0.0'  # Change this to the server's IP address
+SERVER_PORT = 12345
 
-sender_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a socket
-sender_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-sender_address = ('localhost', 12345) # Bind the socket to a specific address and port
-sender_socket.bind(sender_address)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Listen for incoming connections
-sender_socket.listen(1)
-connection, client_address = sender_socket.accept()
-
-BUFFER_SIZE = 1 # number of frames to store before current frame in queue
 cap = cv2.VideoCapture(0)
+BUFFER_SIZE = 1
 cap.set(cv2.CAP_PROP_BUFFERSIZE, BUFFER_SIZE)
 if not cap.isOpened():
-    sender_socket.close()    
     exit(0)
+
+client_socket.connect((SERVER_HOST, SERVER_PORT))
+
+while True:
+    for _ in range(BUFFER_SIZE+2):
+        ret, image = cap.read()
+    original_size = image.shape
+    image = cv2.resize(image, (448, 448))
+    image_base64_string = image_to_base64(image)
     
-WAIT_SECONDS = 3
-try:
-    ret, image = cap.read()
-    while ret:
-        send_image_get_response(connection, image)
-        wait_delay(WAIT_SECONDS)
-        
-        for _ in range(BUFFER_SIZE + 1):
-            # throw stacked past images and get current image
-            ret, image = cap.read()          
-finally:
-    print("senderSide: terminating code.")
-    connection.close()
-    sender_socket.close()
+    closed = send_data(client_socket, image_base64_string, original_size)
+    if closed:
+        break
+    
+    response_json_dict = get_data(client_socket)
+
+    closed = process_data(response_json_dict)
+    if closed:
+        break
+
+client_socket.close()
+cap.release()

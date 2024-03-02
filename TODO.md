@@ -19,10 +19,11 @@
 - 2 depth models(one for cityscapes one for indoors) should be included in app, model selection will be left to user. 📏
 
 # RTSP-SIDE
-- images can be sent as json objects 💡
-- additional information(original image size, YOLO version, DEPTH model type etc.) about pipeline usage must be sent also 🎫
-- images can sent in base64 💡
-- problem with already open connections must be solved 🎫
+- images can be sent as json objects ✅
+- additional information(original image size, YOLO version, DEPTH model type etc.) about pipeline usage must be sent also ✅
+- images can sent in base64 ✅
+- problem with already open connections must be solved ✅
+- additional information(users feedback delay second preference, prefered YOLO models etc.) can be send from user to server at initial connection
 
 # ENTIRE CODE
 - temporary function importing must be added for image receiving functions 🎫
