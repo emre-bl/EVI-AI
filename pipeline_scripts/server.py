@@ -2,8 +2,12 @@ import socket
 import pickle
 import cv2
 from ultralytics import YOLO
+
+# TODO: IMPORT FROM RELATIVE PATH
+from ultralytics_YOLOs import *
 from image_receiver import *
 
+# TODO: USE WAYS BEFORE PASSING TEXT TO LLM FOR REPLACING ANGLES WITH WORDS
 ways = {tuple(list(range(-65,-45))): "left",
         tuple(list(range(-45,-25))): "half left",
         tuple(list(range(-25,-10))): "slightly left",
@@ -15,8 +19,7 @@ ways = {tuple(list(range(-65,-45))): "left",
 # yolo_model = YOLO("yolov8s-seg.pt") # small YOLOv8 for segmentation
 yolo_model = YOLO("../YOLO_scripts/yolov5s.pt") # small YOLOv5 for
 
-# TODO: IMPORT FROM RELATIVE PATH
-from ultralytics_YOLOs import *
+
 def yolo_pass(yolo_model, image):
     return get_angle_label_id_and_bboxes(yolo_model, image)
 
@@ -101,10 +104,9 @@ while True:
 
         LLM_out = LLM_pass(prompt)
 
-        closed = send_data(client_socket, LLM_out)
+        closed = send_data(client_socket, LLM_out, end=-1)
         if closed:
             break
-        continue
 
     cv2.destroyAllWindows()
     client_socket.close()

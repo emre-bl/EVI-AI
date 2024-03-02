@@ -5,8 +5,17 @@ import numpy as np
 import base64
 
 def send_data(client_socket, response_data, end=1):
+    """sends text data over internet
+
+    Args:
+        client_socket (socket): socket to send data to
+        response_data (str): text data to send to client_socket
+        end (int, optional): 1 means keep the connection open, -1 means close the socket. Defaults to 1.
+
+    Returns:
+        bool: True means connection is closed False means connection is left open
+    """
     response_json_dict = {"data": response_data, "end": end}
-    # end:-1->close socket, 0->message not ended: 1->message ended
     
     # print("sent", response_json_dict)
     response_json_data = json.dumps(response_json_dict)
@@ -15,11 +24,20 @@ def send_data(client_socket, response_data, end=1):
     return response_json_dict["end"] == -1
 
 def get_data(client_socket):
+    """retrieves data from socket
+
+    Args:
+        client_socket (socket): socket to listen for data
+
+    Returns:
+        dict: dictionary from retrieved json data
+    """
     whole_data = ""
 
     while True:
         message_json_data = client_socket.recv(4096).decode()
         whole_data = whole_data + message_json_data
+        # checks if message package is complated(better check can be done)
         if "\"end\": 1}" in whole_data:
             break
         if "\"end\": -1}" in whole_data:
@@ -29,6 +47,14 @@ def get_data(client_socket):
     return message_json_dict
 
 def process_data(json_dict):
+    """processes retrieved dictionary data
+
+    Args:
+        json_dict (dict): dictionary that contains information about data
+
+    Returns:
+        bool: True means connection is closed False means connection is left open
+    """
     # print("received:", json_dict)
     if json_dict["end"] == 1:
         image = base64_to_image(json_dict["data"])
@@ -40,6 +66,14 @@ def process_data(json_dict):
         return True
 
 def base64_to_image(base64_string):
+    """converts base64 to an image
+
+    Args:
+        base64_string (str): base64 string of image
+
+    Returns:
+        numpy.ndarray: result array
+    """
     buffer = base64.b64decode(base64_string)
     image = cv2.imdecode(np.frombuffer(buffer, dtype=np.uint8), -1)
     return image
@@ -63,6 +97,7 @@ if __name__ == "__main__":
             closed = process_data(message_json_dict)
             if closed:
                 break
+            
             closed = send_data(client_socket, "response")
             if closed:
                 break

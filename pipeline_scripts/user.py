@@ -1,6 +1,8 @@
 import socket
 import cv2
 import time
+
+# TODO: IMPORT FROM RELATIVE PATH
 from image_sender import *
 
 # function to set image sending frequency
@@ -39,7 +41,7 @@ while True:
         break
     
     response_json_dict = get_data(client_socket)
-    
+
     closed = process_data(response_json_dict)
     if closed:
         break
