@@ -2,6 +2,7 @@ import socket
 import pickle
 import cv2
 from ultralytics import YOLO
+from image_receiver import *
 
 ways = {tuple(list(range(-65,-45))): "left",
         tuple(list(range(-45,-25))): "half left",
@@ -71,39 +72,27 @@ def LLM_pass(prompt):
     return LLM_out
 
 
-# Function to receive image data
-def get_image_data():
-    image_data = b""
-    
-    while True: # Loop until the entire data is received
-        chunk = receiver_socket.recv(4096)
-        if not chunk:
-            break
+# Define server address and port
+SERVER_HOST = '0.0.0.0'  # This allows connections from any network interface
+SERVER_PORT = 12345
 
-        image_data += chunk
-        if image_data[-14:] == "SENDERSIDEDONE".encode():
-            image_data = image_data[:-14]
-            break
-
-    if not image_data:
-        raise Exception("no image data")
-
-    # Deserialize the image using pickle
-    image = pickle.loads(image_data)
-    image = cv2.resize(image, (image.shape[0]*2, image.shape[1]*2))
-    return image
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create a TCP/IP socket
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket.bind((SERVER_HOST, SERVER_PORT)) # Bind the socket to the address and port
 
 
-# Create a socket
-receiver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# Connect to the server
-server_address = ('localhost', 12345)
-receiver_socket.connect(server_address)
+while True:
+    server_socket.listen(1) # Listen for incoming connections
+    client_socket, client_address = server_socket.accept() # wait and accept incoming connection 
 
-try:
     while True:
-        image = get_image_data()
-        cv2.imshow("reveived_image", image)
+        message_json_dict = get_data(client_socket)
+        closed = process_data(message_json_dict)
+        if closed:
+            break
+
+        image = message_json_dict["image"]
+        cv2.imshow("server received this:", image)
         cv2.waitKey(1)
 
         YOLO_and_DEPTH_out = send_image_to_models(image)
@@ -112,10 +101,11 @@ try:
 
         LLM_out = LLM_pass(prompt)
 
-        response = LLM_out + "RECEIVERSIDEDONE"
+        closed = send_data(client_socket, LLM_out)
+        if closed:
+            break
+        continue
 
-        receiver_socket.send(response.encode())
-finally:
     cv2.destroyAllWindows()
-    print("receiverSide: terminating code.")
-    receiver_socket.close()
+    client_socket.close()
+    break
