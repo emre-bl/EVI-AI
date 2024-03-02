@@ -84,36 +84,17 @@ class DepthEstimationModel:
         return image
     
 
-    def calculate_depthmap(self, image_path, output_path):
-        print("Device:", self.device)
-        print("Calculating depth map for", image_path, "...")
-        
-        image = Image.open(image_path).convert("RGB")
+    def calculate_depthmap(self, pil_image, output_path): 
+        image = pil_image.convert("RGB")
         image = self.make_image_3_4(image)
         image = self.reduce_image_size(image)
-        
-        start = time.time()
         depth_numpy = self.model.infer_pil(image)
-        end = time.time()
-        print("Depth map calculated. Time:", end - start, "seconds.")
         self.save_colored_depth(depth_numpy, output_path)
-        print(self.get_nearest_object_position(depth_numpy))
+        return depth_numpy
 
     def reduce_image_size(self, image): # bunu hızlandırmak için ekledim. silinebilir.
         width, height = image.size
         return image.resize((width // 4, height // 4))
-    
-    def mirror_image(self, image): # get_nearest_object_position fonksiyonunu test etmek için ekledim. 
-        return image.transpose(Image.FLIP_LEFT_RIGHT)
+  
 
     
-    
-model = DepthEstimationModel()
-for i in range(1,5):
-    model.calculate_depthmap(f"test_images/test{i}.png", f"outputs/{i}_depth.png")
-    print("------------------------------------------------------")
-
-
-#Model ilk çalışırken biraz zaman alıyor. Ancak sonra çok seri okuyup işlem yapıyor.
-
-
