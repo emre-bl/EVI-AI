@@ -14,20 +14,18 @@
 - LLM prompts should be tried and improved if needed 📏
 
 # DEPTH-MODELS-SIDE
-- best pretrained models on telegram must be selected (one for city and one for indoor cases) 🎫
-- inference code for both models must be created 🎫
-- 2 depth models(one for cityscapes one for indoors) should be included in app, model selection will be left to user. 📏
+- one functional depth model must implemented 🎫
+- 2 depth models(one for cityscapes one for indoors) could be included, model selection will be left to user. 💡
 
 # RTSP-SIDE
 - images can be sent as json objects ✅
 - additional information(original image size, YOLO version, DEPTH model type etc.) about pipeline usage must be sent also ✅
 - images can sent in base64 ✅
 - problem with already open connections must be solved ✅
-- additional information(users feedback delay second preference, prefered YOLO models etc.) can be send from user to server at initial connection
+- additional information(users feedback delay second preference, prefered YOLO models etc.) can be send from user to server at initial connection 💡
 
 # ENTIRE CODE
-- temporary function importing must be added for image receiving functions 🎫
-- functions must be imported from their relative path to user.py and server.py 🎫
+- functions should be imported from their relative path to user.py and server.py 📏
 - whole pipeline must be merged together 🎫
 - text-to-speech can be better, maybe it will work better in phone 💡
 - whole code should be able to controlled via yaml file 💡
