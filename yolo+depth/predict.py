@@ -4,14 +4,38 @@ from DepthModel import DepthEstimationModel
 import torch
 from models.experimental import attempt_load
 import numpy as np
+import os
+import sys
 
-yolo_model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+class SuppressOutput:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        self._original_stderr = sys.stderr
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
 
-depth_model = DepthEstimationModel()
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stderr.close()
+        sys.stdout = self._original_stdout
+        sys.stderr = self._original_stderr
+
+with SuppressOutput():
+    yolo_model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+
+with SuppressOutput():
+    depth_model = DepthEstimationModel()
+
+# Confidence threshold for filtering detections
+confidence_threshold = 0.5  # Set the confidence threshold to 50%
+
+image_width = 1080      
+image_height = 720
 
 def combined_predictor(image_path):
     # Load image
     image = cv2.imread(image_path)
+    image = cv2.resize(image, (image_width, image_height))
     
     # Step 1: Object Detection with YOLO
     # Convert the image from BGR to RGB as YOLO model might expect RGB images
@@ -25,6 +49,10 @@ def combined_predictor(image_path):
     # Check if any objects are detected
     if len(detections) > 0:
         for *xyxy, conf, cls in detections:
+            
+            if conf < confidence_threshold: # Skip detections with low confidence
+                continue
+            
             # Extract bounding box coordinates as integers
             x_min, y_min, x_max, y_max = map(int, xyxy)
             bbox = [(x_min, y_min), (x_max, y_max)]
@@ -49,4 +77,4 @@ def combined_predictor(image_path):
     cv2.destroyAllWindows()
 
 # Example usage
-combined_predictor('test6.png')
+combined_predictor('test7.png')

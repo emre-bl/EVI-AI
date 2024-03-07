@@ -20,7 +20,6 @@ class DepthEstimationModel:
             model_repo, model_name, pretrained=True, skip_validation=False
         )
         model.eval()
-        print("Model initialized.")
         return model
     
     def save_colored_depth(self, depth_numpy, output_path):
