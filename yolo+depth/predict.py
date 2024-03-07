@@ -33,6 +33,8 @@ confidence_threshold = 0.5  # Set the confidence threshold to 50%
 image_width = 800      
 image_height = 600
 
+yolo_model.max_det = 10
+
 def combined_predictor(image_path):
     # Load image
     image = cv2.imread(image_path)
