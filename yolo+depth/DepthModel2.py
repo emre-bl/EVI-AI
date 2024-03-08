@@ -7,20 +7,26 @@ import numpy as np
 class DepthEstimationModel:
     def __init__(self) -> None:
         self.device = self._get_device()
-        self.model = self._initialize_model(
-            model_repo="isl-org/ZoeDepth", model_name="ZoeD_N"
-        ).to(self.device)
+        self.model, self.transform = self._initialize_model(
+            model_repo="intel-isl/MiDaS", model_name="MiDaS_small"
+        )
 
     def _get_device(self):
-        return "cuda" if torch.cuda.is_available() else "cpu"
+        #return "cuda" if torch.cuda.is_available() else "cpu"
+        return "cpu"
 
-    def _initialize_model(self, model_repo="isl-org/ZoeDepth", model_name="ZoeD_N"):
-        torch.hub.help("intel-isl/MiDaS", "DPT_BEiT_L_384", force_reload=True)
+    def _initialize_model(self, model_repo, model_name):
+        # Download the MiDaS
+        torch.hub.help("intel-isl/MiDaS", "MiDaS_small")
         model = torch.hub.load(
             model_repo, model_name, pretrained=True, skip_validation=False
         )
+        model = model.to(self.device)
         model.eval()
-        return model
+        #input transformational pipeline
+        transforms = torch.hub.load(model_repo, "transforms")
+        transform = transforms.small_transform
+        return model, transform
     
     def save_colored_depth(self, depth_numpy, output_path):
         colored = colorize(depth_numpy)
@@ -44,9 +50,22 @@ class DepthEstimationModel:
         return image
     
 
-    def calculate_depthmap(self, image): 
-        depth_numpy = self.model.infer_pil(image)
-        return depth_numpy
+    def calculate_depthmap(self, image):
+        # convert image to PIL format
+        imagebatch = self.transform(image).to(self.device)
+
+        # make a prediction
+        with torch.no_grad():
+            depth = self.model(imagebatch)
+            depth = torch.nn.functional.interpolate(
+                depth.unsqueeze(1),
+                size=image.size[::-1],
+                mode="bicubic",
+                align_corners=False,
+            ).squeeze()
+        # create a depth map
+        depth_map = depth.squeeze().cpu().numpy()
+        return depth_map
 
     def reduce_image_size(self, image): # bunu hızlandırmak için ekledim. silinebilir.
         width, height = image.size

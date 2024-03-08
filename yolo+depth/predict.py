@@ -1,8 +1,8 @@
 import cv2
 
 def combined_predictor(image_path, yolo_model, depth_model, confidence_threshold=0.5):
-    image_width = 800      
-    image_height = 600
+    image_width = 600      
+    image_height = 450
     
     image = cv2.imread(image_path)
     image = cv2.resize(image, (image_width, image_height))
@@ -12,10 +12,9 @@ def combined_predictor(image_path, yolo_model, depth_model, confidence_threshold
 
     # Extract detection results
     detections = yolo_results.xyxy[0] 
-
     # Check if any objects are detected
     if len(detections) > 0:
-        depth_map = depth_model.calculate_depthmap(image, "output.png")
+        depth_map = depth_model.calculate_depthmap(image)
         for *xyxy, conf, cls in detections:
             
             if conf < confidence_threshold: # Skip detections with low confidence
