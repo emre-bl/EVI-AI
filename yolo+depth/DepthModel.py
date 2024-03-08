@@ -48,8 +48,9 @@ class DepthEstimationModel:
         #image = self.make_image_3_4(image) 
         # our image is already 3:4
         depth_numpy = self.model.infer_pil(image)
-        colored = self.save_colored_depth(depth_numpy, output_path)
-        return depth_numpy, colored
+        #colored = self.save_colored_depth(depth_numpy, output_path)
+        #return depth_numpy, colored
+        return depth_numpy
 
     def reduce_image_size(self, image): # bunu hızlandırmak için ekledim. silinebilir.
         width, height = image.size
