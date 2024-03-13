@@ -16,8 +16,8 @@ def wait_delay(WAIT_SECONDS):
         pass
 
 # Define server address and port
-SERVER_HOST = '0.0.0.0'  # Change this to the server's IP address
-SERVER_PORT = 12345
+SERVER_HOST = '127.0.0.1'  # Change this to the server's IP address
+SERVER_PORT = 5000   #12345
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
