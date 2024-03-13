@@ -38,7 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
   AudioPlayer audioPlayer = AudioPlayer();
   Timer? timer;
   bool shouldPlayStartSound = true; // Flag to control start sound playback
-
+  bool ifStarted = false; // Initial state of the button
+  bool allowPlayStartSound = true; // Flag to control start sound playback
 
   /*Future callPythonScript(Url) async {
     http.Response Response = await http.get(Url);
@@ -64,36 +65,40 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    audioPlayer.onPlayerComplete.listen((event) {
+      if (allowPlayStartSound) { // Only replay start sound if 'Stop' button is not pressed
+        playStartSound();
+      }
+    });
     playStartSound(); // Play the start sound immediately on app start
   }
 
   void playStartSound() async {
-  await audioPlayer.play(AssetSource('start_sound.mp3')); // Play the start sound
-  audioPlayer.onPlayerComplete.listen((event) async { // Mark the callback as 'async'
-    if (shouldPlayStartSound) {
-      // This await is inside an async callback, so it's okay
-      await Future.delayed(Duration(seconds: 1)); // Wait for one second
-      playStartSound(); // Replay the sound after the delay
+    if (!ifStarted) {
+      await audioPlayer.play(AssetSource('start_sound.mp3'));
     }
-  });
-}
+  }
+
+  void stopStartSound() {
+    audioPlayer.stop(); 
+    allowPlayStartSound = false;
+  }
 
   void playSound() async {
-    if (!shouldPlayStartSound) { // Check if we should play the sound
+    if (!shouldPlayStartSound) {
       await audioPlayer.play(AssetSource('LLM_output.mp3')); // Your periodic sound file
     }
   }
 
   void startTimer() {
-    shouldPlayStartSound = false; // Stop the start sound loop when the timer starts
-    // This function starts the timer when the user presses the start button
-    timer = Timer.periodic(Duration(seconds: 5), (Timer t) => playSound());
+    timer = Timer.periodic(Duration(seconds: 5), (Timer t) async {
+      await audioPlayer.play(AssetSource('LLM_output.mp3'));
+    });
   }
 
   @override
   void dispose() {
     timer?.cancel();
-    audioPlayer.stop(); // Stop any playing sound
     audioPlayer.dispose();
     super.dispose();
   }
@@ -112,13 +117,20 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(16.0), // Add some padding around the button
             child: ElevatedButton(
               onPressed: () {
-                if (shouldPlayStartSound) {
-                  // Stop the start sound and prevent it from playing again
-                  audioPlayer.stop();
-                  shouldPlayStartSound = false;
-                  startTimer(); // Start the timer for the periodic sound
-                }
-                //runUser(Uri.parse(url));
+                setState(() {
+                  ifStarted = !ifStarted; // Toggle the state
+                  if (ifStarted) {// 'Stop' button is pressed
+                    // stop the start sound and start the timer
+                    stopStartSound(); // Ensure the start sound is stopped before starting the timer
+                    startTimer(); // Start the timer for the periodic sound
+                  } else {// 'Start' button is pressed
+                    // stop the timer and reset to initial state
+                    timer?.cancel();
+                    shouldPlayStartSound = true;
+                    allowPlayStartSound = true;
+                    playStartSound(); // play the start sound again
+                  }
+                });
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, double.infinity), // Set the button size to as big as its parent allows
@@ -128,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Removes additional space for the ink splash
               ),
               child: Text(
-                'Start',
+                ifStarted ? 'Stop' : 'Start',
                 style: TextStyle(fontSize: 48),
               ),
             ),
