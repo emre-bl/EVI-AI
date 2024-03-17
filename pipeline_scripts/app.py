@@ -1,19 +1,17 @@
-from flask import Flask
+from flask import Flask, jsonify
 import subprocess
 
 app = Flask(__name__)
 
-@app.route('/api')#, methods=['POST'])
+@app.route('/runscript', methods=['GET'])
 def run_script():
     try:
-        # Run your user.py script and capture its output
-        completed_process = subprocess.run(['python', 'pipeline_scripts/user.py'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        # If the script was successful, return its output
-        return completed_process.stdout, 200
+        # Replace 'python' with 'python3' if required by your environment
+        result = subprocess.run(['python', 'C:/GitHub/EVI-AI/pipeline_scripts/user.py'], stdout=subprocess.PIPE, text=True, check=True)
+        output = result.stdout
+        return jsonify({'success': True, 'output': output}), 200
     except subprocess.CalledProcessError as e:
-        # If the script failed, return the error message
-        error_message = e.stderr if e.stderr else 'An error occurred while running the script.'
-        return error_message, 500
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
