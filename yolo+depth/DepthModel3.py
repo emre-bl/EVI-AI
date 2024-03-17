@@ -1,7 +1,4 @@
-import time
 import torch
-from PIL import Image, ImageDraw, ImageFont
-from misc import colorize
 import numpy as np
 from zoedepth.models.builder import build_model
 from zoedepth.utils.config import get_config
@@ -9,8 +6,8 @@ from zoedepth.utils.config import get_config
 class DepthEstimationModel:
     def __init__(self) -> None:
         self.device = self._get_device() 
-    self.conf = get_config("zoedepth", "infer", config_version="kitti")
-    self.model = build_model(self.conf)    
+        self.conf = get_config(self, "zoedepth", "infer", config_version="kitti")
+        self.model = build_model(self.conf)   
 
     def _get_device(self):
         return "cuda" if torch.cuda.is_available() else "cpu"
@@ -22,8 +19,8 @@ class DepthEstimationModel:
         return model
 
     def calculate_depthmap(self, image): 
-        depth_numpy = self.model.infer_pil(image)
-        return depth_numpy
+        depth_map = self.model.infer_pil(image)
+        return depth_map
    
   
 

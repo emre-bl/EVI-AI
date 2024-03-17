@@ -1,4 +1,3 @@
-import time
 import torch
 from PIL import Image, ImageDraw, ImageFont
 from misc import colorize
@@ -45,8 +44,8 @@ class DepthEstimationModel:
     
 
     def calculate_depthmap(self, image): 
-        depth_numpy = self.model.infer_pil(image)
-        return depth_numpy
+        depth_map = self.model.infer_pil(image)
+        return depth_map
 
     def reduce_image_size(self, image): # bunu hızlandırmak için ekledim. silinebilir.
         width, height = image.size

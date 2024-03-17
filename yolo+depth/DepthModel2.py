@@ -1,4 +1,3 @@
-import time
 import torch
 from PIL import Image, ImageDraw, ImageFont
 from misc import colorize
@@ -12,8 +11,7 @@ class DepthEstimationModel:
         )
 
     def _get_device(self):
-        #return "cuda" if torch.cuda.is_available() else "cpu"
-        return "cpu"
+        return "cuda" if torch.cuda.is_available() else "cpu"
 
     def _initialize_model(self, model_repo, model_name):
         # Download the MiDaS
