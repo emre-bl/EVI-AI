@@ -84,10 +84,7 @@ server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((SERVER_HOST, SERVER_PORT)) # Bind the socket to the address and port
 
 
-while True:
-    server_socket.listen(1) # Listen for incoming connections
-    client_socket, client_address = server_socket.accept() # wait and accept incoming connection 
-
+def handle_client(client_socket, client_address):
     while True:
         message_json_dict = get_data(client_socket)
         closed = process_data(message_json_dict)
@@ -95,8 +92,8 @@ while True:
             break
 
         image = message_json_dict["image"]
-        cv2.imshow("server received this:", image)
-        cv2.waitKey(1)
+        #cv2.imshow("server received this:", image)
+        #cv2.waitKey(1)
 
         YOLO_and_DEPTH_out = send_image_to_models(image)
 
@@ -104,10 +101,16 @@ while True:
 
         LLM_out = LLM_pass(prompt)
 
-        closed = send_data(client_socket, LLM_out, end=-1)
+        closed = send_data(client_socket, LLM_out, end=1)
         if closed:
             break
 
     cv2.destroyAllWindows()
     client_socket.close()
-    break
+
+import threading
+while True:
+    server_socket.listen(1) # Listen for incoming connections
+    client_socket, client_address = server_socket.accept() # wait and accept incoming connection 
+
+    threading.Thread(target=handle_client, args=(client_socket, client_address,)).start()
