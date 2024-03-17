@@ -1,3 +1,4 @@
+import sys
 import socket
 import json
 import cv2
@@ -83,32 +84,35 @@ if __name__ == "__main__":
     SERVER_PORT = 12345
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # open a camera connection to get images from
-    cap = cv2.VideoCapture(0)
-    BUFFER_SIZE = 1 # how many frames should captured in queue
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, BUFFER_SIZE)
-    if not cap.isOpened():
-        exit(0)
+    print("created socket")
+    # # open a camera connection to get images from
+    # cap = cv2.VideoCapture(0)
+    # BUFFER_SIZE = 1 # how many frames should captured in queue
+    # cap.set(cv2.CAP_PROP_BUFFERSIZE, BUFFER_SIZE)
+    # if not cap.isOpened():
+    #     exit(0)
 
     client_socket.connect((SERVER_HOST, SERVER_PORT))
-
+    print("connected")
     while True:
-        for _ in range(BUFFER_SIZE+1): # emptying the queue for getting newly captured image
-            ret, image = cap.read()
+        # for _ in range(BUFFER_SIZE+1): # emptying the queue for getting newly captured image
+        #     ret, image = cap.read()
+        image = cv2.imread(sys.argv[1])
         original_size = image.shape
         image = cv2.resize(image, (448, 448))
         image_base64_string = image_to_base64(image)
-        
+        print("image is ready")
         closed = send_data(client_socket, image_base64_string, original_size)
+        print("sent the image")
         if closed:
             break
-        
+        print("not closed after sending")
         response_json_dict = get_data(client_socket)
-        
+        print("received " + str(response_json_dict))
         closed = process_data(response_json_dict)
+        print("processed data")
         if closed:
             break
 
     client_socket.close()
-    cap.release()
+    # cap.release()
