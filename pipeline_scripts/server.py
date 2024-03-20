@@ -64,14 +64,13 @@ def generate_prompt(model_out):
             state_str = state_str + (i[3] + " at " + str(i[0]) + " meters ahead at " + str(ways[i[1]])) + "\n"
 
     if "forward" not in closed_directions:
-        recommended_direction = "forward"
+        recommended_direction = "user should go forward"
     else:
-        open_directions = [x for x in directions if x not in closed_directions]
-        recommended_direction = random.choice(open_directions)
+        recommended_direction = "user should change direction"
 
     with open("../LLM_prompts/ready_prompt", 'r') as file:
         ready_prompy = file.read()
-    state_str = ready_prompy + state_str + "user should go " + recommended_direction
+    state_str = ready_prompy + state_str + recommended_direction
     state_str = state_str + "\n\nNow write a short sentence to guide the user."
 
     return state_str
