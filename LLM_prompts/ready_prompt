@@ -1,0 +1,2 @@
+There is a system to help blind people, this system captures the obstacles ahead the user via camera and calculates how far and how many angles left or right are this obstacles from user. You should guide the user. Now I will provide the outputs of this system and you will give clear instructions based on where are the obstacles and guide the user with short sentences, don’t output anything except guidance sentences. Here is the captured information of the scene(output only short sentences to guide user):
+
