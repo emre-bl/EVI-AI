@@ -1,8 +1,9 @@
 import socket
-import random
 import threading
 import cv2
 from ultralytics import YOLO
+from langchain_community.llms import Ollama
+
 
 # TODO: IMPORT FROM RELATIVE PATH
 from ultralytics_YOLOs import *
@@ -16,6 +17,7 @@ for l,w in zip(angles,directions):
 
 # yolo_model = YOLO("yolov8s-seg.pt") # small YOLOv8 for segmentation
 yolo_model = YOLO("../YOLO_scripts/yolov5s.pt") # small YOLOv5 for
+LLM_model = Ollama(model="llama2")
 
 
 def yolo_pass(yolo_model, image):
@@ -77,10 +79,8 @@ def generate_prompt(model_out):
 
 
 # Function to pass vision models output to LLM API
-def LLM_pass(prompt):
-    return prompt
-    LLM_out = LLM_model(prompt)
-    return LLM_out
+def LLM_pass(LLM_model, prompt):
+    return LLM_model(prompt)
 
 
 # Define server address and port
@@ -104,13 +104,15 @@ def handle_client(client_socket, client_address):
         #cv2.waitKey(1)
 
         YOLO_and_DEPTH_out = send_image_to_models(image)
-
+        
+        YOLO_and_DEPTH_out = [(7, 40, 0, "Tree"), (2, -25, 1, "Car")]
+        
         prompt = generate_prompt(YOLO_and_DEPTH_out)
-
+        print(prompt, flush=True)
         if prompt == "no obstacle detected, go forward":
             LLM_out = prompt
         else:
-            LLM_out = LLM_pass(prompt)
+            LLM_out = LLM_pass(LLM_model, prompt)
 
         closed = send_data(client_socket, LLM_out, end=1)
         if closed:
