@@ -1,5 +1,6 @@
 import socket
-import pickle
+import random
+import threading
 import cv2
 from ultralytics import YOLO
 
@@ -7,14 +8,11 @@ from ultralytics import YOLO
 from ultralytics_YOLOs import *
 from image_receiver import *
 
-# TODO: USE WAYS BEFORE PASSING TEXT TO LLM FOR REPLACING ANGLES WITH WORDS
-ways = {tuple(list(range(-65,-45))): "left",
-        tuple(list(range(-45,-25))): "half left",
-        tuple(list(range(-25,-10))): "slightly left",
-        tuple(list(range(-10,10))): "forward",
-        tuple(list(range(10,25))): "slightly right",
-        tuple(list(range(25,45))): "half right",
-        tuple(list(range(45,65))): "right"}
+ways = {}
+angles = [list(range(-65,-45)),list(range(-45,-25)),list(range(-25,-10)),list(range(-10,10)),list(range(10,25)),list(range(25,45)),list(range(45,65))]
+directions = ["full left","half left","slightly left","forward","slightly right","half right","full right"]
+for l,w in zip(angles,directions):
+    ways.update({k:w for k in l})
 
 # yolo_model = YOLO("yolov8s-seg.pt") # small YOLOv8 for segmentation
 yolo_model = YOLO("../YOLO_scripts/yolov5s.pt") # small YOLOv5 for
@@ -25,7 +23,7 @@ def yolo_pass(yolo_model, image):
 
 
 def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
-    depth_map = depth_model(image)
+    depth_out = depth_model(image)
     if len(YOLO_out) == 0:
         pass
         # no object detected by YOLO
@@ -43,29 +41,40 @@ def send_image_to_models(image):
     send received image to first YOLO and then DEPTH model, merges outputs of models and returns
     """
     YOLO_out, bboxes = yolo_pass(yolo_model, image)
-    return (YOLO_out, YOLO_out)
-    DEPTH_out = depth_pass(depth_model, image, YOLO_out, bboxes, 0.7)
-
-    merged_output = (YOLO_out, DEPTH_out)
-    return merged_output
-
+    return YOLO_out
+    
+    merged_out = depth_pass(depth_model, image, YOLO_out, bboxes, 0.7)
+    return merged_out
+    
 # generates prompt by merging infos from models outputs
-def generate_prompt(YOLO_and_DEPTH_out):
-    """
-    gets outputs of YOLO and DEPTH model and merges them into one list of information about obstacles in scene
-    """
-    # TODO: GENERATE THE PROMPT FROM YOLO AND DEPTH MODEL OUTPUTS
-    # MERGE THEM IN WANTED ORDER
-    # READ THE READY PROMPTS FROM "LLM_prompts" directorty and return result prompt
+def generate_prompt(model_out):
+    if len(model_out) == 0:
+        return "no obstacle detected, go forward"
 
-    if len(YOLO_and_DEPTH_out[0]) != 0:
-        # YOLO detected something
-        blocked_angles = [[way for way in ways.keys() if blocked_way in way][0] for blocked_way in [info[0][1] for info in YOLO_and_DEPTH_out[0]]]
-        available_ways = [ways[available_way] for available_way in ways.keys() if available_way not in blocked_angles]
+    state_str = ""
+    closed_directions = set()
+    
+    if len(model_out[0]) == 3: # yolo didnt detect anything
+        for i in model_out:
+            closed_directions.add(ways[i[1]])
+            state_str = state_str + ("obstacle at " + str(i[0]) + " meters ahead at " + str(ways[i[1]])) + "\n"
+    else: # yolo detected something
+        for i in model_out:
+            closed_directions.add(ways[i[1]])
+            state_str = state_str + (i[3] + " at " + str(i[0]) + " meters ahead at " + str(ways[i[1]])) + "\n"
+
+    if "forward" not in closed_directions:
+        recommended_direction = "forward"
     else:
-        # YOLO detected nothing
-        available_ways = []
-    return str(YOLO_and_DEPTH_out)
+        open_directions = [x for x in directions if x not in closed_directions]
+        recommended_direction = random.choice(open_directions)
+
+    with open("../LLM_prompts/ready_prompt", 'r') as file:
+        ready_prompy = file.read()
+    state_str = ready_prompy + state_str + "user should go " + recommended_direction
+    state_str = state_str + "\n\nNow write a short sentence to guide the user."
+
+    return state_str
 
 
 # Function to pass vision models output to LLM API
@@ -99,7 +108,10 @@ def handle_client(client_socket, client_address):
 
         prompt = generate_prompt(YOLO_and_DEPTH_out)
 
-        LLM_out = LLM_pass(prompt)
+        if prompt == "no obstacle detected, go forward":
+            LLM_out = prompt
+        else:
+            LLM_out = LLM_pass(prompt)
 
         closed = send_data(client_socket, LLM_out, end=1)
         if closed:
@@ -108,7 +120,6 @@ def handle_client(client_socket, client_address):
     cv2.destroyAllWindows()
     client_socket.close()
 
-import threading
 while True:
     server_socket.listen(1) # Listen for incoming connections
     client_socket, client_address = server_socket.accept() # wait and accept incoming connection 
