@@ -1,19 +1,13 @@
 from predict import combined_predictor
-import cv2
 from PIL import Image
 from DepthModel import DepthEstimationModel
 import torch
-from models.experimental import attempt_load
-import numpy as np
-import os
 import sys
 
 confidence_threshold = 0.5  # confidence threshold for YOLO
 
 
 def main():
-    
-
     yolo_model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 
     depth_model = DepthEstimationModel()
@@ -29,3 +23,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+

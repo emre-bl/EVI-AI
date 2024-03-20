@@ -1,6 +1,0 @@
-!git clone https://github.com/isl-org/ZoeDepth.git
-cd ZoeDepth
-!python sanity.py
-
-
-Çalışma süresi olarak Midastan daha  kötü.

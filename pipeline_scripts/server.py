@@ -3,7 +3,7 @@ import threading
 import cv2
 from ultralytics import YOLO
 from langchain_community.llms import Ollama
-
+from depth_model import DepthModel
 
 # TODO: IMPORT FROM RELATIVE PATH
 from ultralytics_YOLOs import *
@@ -19,23 +19,38 @@ for l,w in zip(angles,directions):
 yolo_model = YOLO("../YOLO_scripts/yolov5s.pt") # small YOLOv5 for
 LLM_model = Ollama(model="llama2")
 
+depth_model = DepthModel()
 
 def yolo_pass(yolo_model, image):
     return get_angle_label_id_and_bboxes(yolo_model, image)
 
 
 def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
-    depth_out = depth_model(image)
+    depth_out = depth_model.calculate_depthmap(image)
     if len(YOLO_out) == 0:
         pass
         # no object detected by YOLO
         # look for obstacles that are close to camera
         # return format: depth, angle, id --> (7, 40, id=2)
     else:
-        pass
         # get the mask/bounding box of objects and calculate the distance
         # return the informations of objects that are closer than closeness_threshold
         # return format is depth, angle, id, label --> (7, 40, id=2, "Table")
+        close_objects = []
+
+        for i, (angle_label_id, bbox) in enumerate(zip(YOLO_out, bboxes)):
+            center_x = (bbox[0][0] + bbox[1][0]) // 2
+            center_y = (bbox[0][1] + bbox[1][1]) // 2
+
+            depth_value = depth_out[center_y, center_x]
+
+            if depth_value < closeness_threshold:
+                # Object is considered close
+                angle, label, obj_id = angle_label_id
+                close_objects.append((depth_value, angle, obj_id, label))
+
+        return close_objects
+
 
 # funtion to pass image to vision models
 def send_image_to_models(image):
@@ -43,7 +58,6 @@ def send_image_to_models(image):
     send received image to first YOLO and then DEPTH model, merges outputs of models and returns
     """
     YOLO_out, bboxes = yolo_pass(yolo_model, image)
-    return YOLO_out
     
     merged_out = depth_pass(depth_model, image, YOLO_out, bboxes, 0.7)
     return merged_out
