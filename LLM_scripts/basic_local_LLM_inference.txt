@@ -1,0 +1,20 @@
+1- curl -fsSL https://ollama.com/install.sh | sh 
+2- ollama pull llama2
+3- pip install langchain-community langchain-core
+4- pip install --upgrade langchain
+5- python llama2_deneme.py
+
+eğer 1. adımda hata alıyorsan büyük ihtimalle "curl re-installation" adımlarını izlemen gerek
+
+curl re-installation:
+1- sudo snap remove curl
+2- sudo apt install curl
+
+
+
+
+
+llama2_deneme.py:
+from langchain_community.llms import Ollama
+llm = Ollama(model="llama2")
+print(llm("what is german for cat and dog?")
