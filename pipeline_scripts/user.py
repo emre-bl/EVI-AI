@@ -3,49 +3,66 @@ import cv2
 #import sys
 import time
 import requests
+import os
 
 # TODO: IMPORT FROM RELATIVE PATH
 from image_sender import *
 
-from flask import Flask, request, jsonify
-import cv2
-import numpy as np
-import base64
-import os
+# Define server address and port
+SERVER_HOST = '0.0.0.0'  # Change this to the server's IP address
+SERVER_PORT = 12345
 
-app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return "Flask server is running!"
-
-@app.route('/process_image', methods=['POST'])
-def process_image():
-    app.logger.info('Data received: %s', request.data)  # Log raw request data
-    if request.is_json:
-        data = request.get_json()
-        app.logger.info('JSON data: %s', data)  # Log JSON data
-        image_data = data.get('image')
-
-        # Decode the Base64 string, convert to a NumPy array
-        img_bytes = base64.b64decode(image_data)
-        nparr = np.frombuffer(img_bytes, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
-
-        # Save the image for later use
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        save_path = os.path.join(script_dir, 'received_image.jpg')
-        cv2.imwrite(save_path, img)
-
-        return jsonify({'message': 'Image processed successfully'}), 200
+def read_saved_image(image_path):
+    img = cv2.imread(image_path)
+    if img is not None:
+        resized_img = cv2.resize(img, (448, 448))
+        return resized_img
     else:
-        return jsonify({'error': 'Request must be JSON'}), 400
+        print("Failed to load the image")
+        return None
+
+# Main logic
+def main():
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((SERVER_HOST, SERVER_PORT))
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    image_path = os.path.join(script_dir, 'received_image.jpg')
+    last_mod_time = None  # Track the last modification time of the image
+
+    try:
+        while True:
+            # Check if the image file has been updated
+            try:
+                mod_time = os.path.getmtime(image_path)
+                if mod_time != last_mod_time:
+                    last_mod_time = mod_time
+                    image = read_saved_image(image_path)
+                    if image is not None:
+                        image_base64_string = image_to_base64(image)
+                        closed = send_data(client_socket, image_base64_string, image.shape)
+                        if closed:
+                            break
+
+                        response_json_dict = get_data(client_socket)
+                        print(response_json_dict)
+
+                        closed = process_data(response_json_dict)
+                        if closed:
+                            break
+            except OSError:
+                print("Image file not found. Waiting for the file...")
+            
+            time.sleep(10)  # Check for a new image every 10 seconds
+    finally:
+        client_socket.close()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    main()
 
 
-# function to set image sending frequency
+"""# function to set image sending frequency
 # >0:wait, 0:send manual, other:realtime
 def wait_delay(WAIT_SECONDS):
     if WAIT_SECONDS > 0:
@@ -90,3 +107,4 @@ while True:
 
 client_socket.close()
 cap.release()
+"""
