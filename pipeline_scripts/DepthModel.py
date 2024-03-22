@@ -1,7 +1,4 @@
 import torch
-from PIL import Image, ImageDraw, ImageFont
-from misc import colorize
-import numpy as np
 
 class DepthEstimationModel:
     def __init__(self) -> None:
