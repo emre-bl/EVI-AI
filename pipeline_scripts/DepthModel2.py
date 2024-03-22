@@ -1,6 +1,4 @@
 import torch
-from PIL import Image, ImageDraw, ImageFont
-from misc import colorize
 import numpy as np
 
 class DepthEstimationModel:
@@ -25,27 +23,7 @@ class DepthEstimationModel:
         transforms = torch.hub.load(model_repo, "transforms")
         transform = transforms.small_transform
         return model, transform
-    
-    def save_colored_depth(self, depth_numpy, output_path):
-        colored = colorize(depth_numpy)
-        image = Image.fromarray(colored)
-        image.save(output_path)
-        return image
 
-        
-    def make_image_3_4(self, image):
-        width, height = image.size
-        if width > height:
-            new_width = 4 * height // 3
-            left = (width - new_width) // 2
-            right = width - left
-            image = image.crop((left, 0, right, height))
-        else:
-            new_height = 3 * width // 4
-            top = (height - new_height) // 2
-            bottom = height - top
-            image = image.crop((0, top, width, bottom))
-        return image
     
 
     def calculate_depthmap(self, image):
@@ -65,9 +43,6 @@ class DepthEstimationModel:
         depth_map = depth.squeeze().cpu().numpy()
         return depth_map
 
-    def reduce_image_size(self, image): # bunu hızlandırmak için ekledim. silinebilir.
-        width, height = image.size
-        return image.resize((width // 4, height // 4))
   
 
     
