@@ -4,6 +4,9 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+//import 'package:path_provider/path_provider.dart';
+//import 'package:path/path.dart' as path;
 
 List<CameraDescription> cameras = [];
 
@@ -48,9 +51,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool ifStarted = false; // Initial state of the button
   bool allowPlayStartSound = true; // Flag to control start sound playback
   CameraController? cameraController;
+  int counter = 0;
 
   /*Future<void> runUserScript() async {
-    final uri = Uri.parse('http://127.0.0.1:5000/receive_frame');
+    final uri = Uri.parse('http://127.0.0.1:5000//runscript');
     //final uri = Uri.parse('http://10.0.2.2:5000/runscript');
     try {
       final response = await http.get(uri);
@@ -71,28 +75,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Method to capture and send frame
   Future<void> captureAndSendFrame() async {
-    if (cameraController != null && cameraController!.value.isInitialized) {
-      final XFile image = await cameraController!.takePicture(); // Capture a frame
+    if (!cameraController!.value.isInitialized) {
+      debugPrint("Controller is not initialized");
+      return;
+    }
 
-      // Convert image to a byte array
-      final bytes = await image.readAsBytes();
+    try {
+      final image = await cameraController!.takePicture();
+      final imagePath = image.path;
 
-      // Prepare for HTTP request
-      final uri = Uri.parse('http://127.0.0.1:5000/receive_frame'); // Adjust the URL to your server endpoint
-      //final uri = Uri.parse('http://10.0.2.2:5000/runscript');
-      final headers = {'Content-Type': 'application/json'};
-      final body = json.encode({'image': base64Encode(bytes)}); // Encode the byte array to a Base64 string
+      // Read the image as bytes
+      File imgFile = File(imagePath);
+      List<int> imageBytes = await imgFile.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
 
-      try {
-        final response = await http.post(uri, headers: headers, body: body);
-        if (response.statusCode == 200) {
-          debugPrint("Frame sent successfully");
-        } else {
-          debugPrint("Failed to send frame. Server error: ${response.body}");
-        }
-      } catch (e) {
-        debugPrint("Error sending the frame: $e");
+      // Send to your Flask server as a POST request
+      Uri uri = Uri.parse('http://10.2.136.209:5000/process_image');
+      var response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"image": base64Image}),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Image uploaded successfully. $counter');
+        counter += 1;
+      } else {
+        debugPrint('Failed to upload image. Status code: ${response.statusCode}. Response body: ${response.body}');
       }
+    } catch (e) {
+      debugPrint("Error capturing and sending frame (catch): $e");
     }
   }
 
@@ -147,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void startTimerForFrames() {
-    const period = Duration(seconds: 20); // Set the period to 20 seconds
+    const period = Duration(seconds: 10); // Set the period to 20 seconds
     timer2 = Timer.periodic(period, (Timer t) async {
       await captureAndSendFrame(); // Capture and send the frame
     });
