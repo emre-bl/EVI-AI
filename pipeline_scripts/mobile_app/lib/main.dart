@@ -49,9 +49,9 @@ class _MyHomePageState extends State<MyHomePage> {
   bool allowPlayStartSound = true; // Flag to control start sound playback
   CameraController? cameraController;
 
-  Future<void> runUserScript() async {
-    //final uri = Uri.parse('http://127.0.0.1:5000/runscript');
-    final uri = Uri.parse('http://10.0.2.2:5000/runscript');
+  /*Future<void> runUserScript() async {
+    final uri = Uri.parse('http://127.0.0.1:5000/receive_frame');
+    //final uri = Uri.parse('http://10.0.2.2:5000/runscript');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -66,6 +66,33 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       // Handle any errors that occur during the request
       debugPrint("Error making the request: $e");
+    }
+  }*/
+
+  // Method to capture and send frame
+  Future<void> captureAndSendFrame() async {
+    if (cameraController != null && cameraController!.value.isInitialized) {
+      final XFile image = await cameraController!.takePicture(); // Capture a frame
+
+      // Convert image to a byte array
+      final bytes = await image.readAsBytes();
+
+      // Prepare for HTTP request
+      final uri = Uri.parse('http://127.0.0.1:5000/receive_frame'); // Adjust the URL to your server endpoint
+      //final uri = Uri.parse('http://10.0.2.2:5000/runscript');
+      final headers = {'Content-Type': 'application/json'};
+      final body = json.encode({'image': base64Encode(bytes)}); // Encode the byte array to a Base64 string
+
+      try {
+        final response = await http.post(uri, headers: headers, body: body);
+        if (response.statusCode == 200) {
+          debugPrint("Frame sent successfully");
+        } else {
+          debugPrint("Failed to send frame. Server error: ${response.body}");
+        }
+      } catch (e) {
+        debugPrint("Error sending the frame: $e");
+      }
     }
   }
 
@@ -126,34 +153,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // Method to capture and send frame
-  Future<void> captureAndSendFrame() async {
-    if (cameraController != null && cameraController!.value.isInitialized) {
-      final XFile image = await cameraController!.takePicture(); // Capture a frame
-
-      // Convert image to a byte array
-      final bytes = await image.readAsBytes();
-
-      // Prepare for HTTP request
-      //final uri = Uri.parse('http://127.0.0.1:5000/runscript'); // Adjust the URL to your server endpoint
-      final uri = Uri.parse('http://10.0.2.2:5000/runscript');
-      final headers = {'Content-Type': 'application/json'};
-      final body = json.encode({'image': base64Encode(bytes)}); // Encode the byte array to a Base64 string
-
-      try {
-        final response = await http.post(uri, headers: headers, body: body);
-        if (response.statusCode == 200) {
-          debugPrint("Frame sent successfully");
-        } else {
-          debugPrint("Failed to send frame. Server error: ${response.body}");
-        }
-      } catch (e) {
-        debugPrint("Error sending the frame: $e");
-      }
-    }
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ifStarted = !ifStarted; // Toggle the state
                   if (ifStarted) {// 'Stop' button is pressed
                     // stop the start sound and start the timer
-                    runUserScript();
+                    //runUserScript();
                     stopStartSound(); // Ensure the start sound is stopped before starting the timer
                     startTimer(); // Start the timer for the periodic sound
                     startTimerForFrames(); // Start the timer for capturing and sending frames
