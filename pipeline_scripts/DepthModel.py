@@ -20,7 +20,6 @@ class DepthEstimationModel:
         model.eval()
         return model
     
-
     def calculate_depthmap(self, image): 
         depth_map = self.model.infer_pil(image)
         return depth_map
