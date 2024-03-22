@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
-
+import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-void main() {
+List<CameraDescription> cameras = [];
+
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras(); // Get a list of available cameras
   runApp(const MyApp());
 }
 
@@ -39,32 +43,42 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   AudioPlayer audioPlayer = AudioPlayer();
   Timer? timer;
+  Timer? timer2;
   bool shouldPlayStartSound = true; // Flag to control start sound playback
   bool ifStarted = false; // Initial state of the button
   bool allowPlayStartSound = true; // Flag to control start sound playback
+  CameraController? cameraController;
 
   Future<void> runUserScript() async {
-  final uri = Uri.parse('http://127.0.0.1:5000/runscript');
-  try {
-    final response = await http.get(uri);
-    if (response.statusCode == 200) {
-      // Successfully executed the script
-      final data = jsonDecode(response.body);
-      debugPrint("Script is running ${data['output']}");
-      // You can update your UI or state based on the script output
-    } else {
-      // Handle server errors
-      debugPrint("Failed to execute script. Server error: ${response.body}");
+    //final uri = Uri.parse('http://127.0.0.1:5000/runscript');
+    final uri = Uri.parse('http://10.0.2.2:5000/runscript');
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        // Successfully executed the script
+        final data = jsonDecode(response.body);
+        debugPrint("Script is running ${data['output']}");
+        // You can update your UI or state based on the script output
+      } else {
+        // Handle server errors
+        debugPrint("Failed to execute script. Server error: ${response.body}");
+      }
+    } catch (e) {
+      // Handle any errors that occur during the request
+      debugPrint("Error making the request: $e");
     }
-  } catch (e) {
-    // Handle any errors that occur during the request
-    debugPrint("Error making the request: $e");
   }
-}
 
   @override
   void initState() {
     super.initState();
+    // Initialize camera controller
+    cameraController = CameraController(cameras[0], ResolutionPreset.medium); // Initialize camera controller
+    cameraController!.initialize().then((_) {
+      if (!mounted) return;
+      setState(() {}); // When the camera is initialized, rebuild the widget
+    });
+
     audioPlayer.onPlayerComplete.listen((event) {
       if (allowPlayStartSound) { // Only replay start sound if 'Stop' button is not pressed
         playStartSound();
@@ -99,9 +113,46 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     timer?.cancel();
+    timer2?.cancel();
     audioPlayer.dispose();
+    //cameraController?.dispose();
     super.dispose();
   }
+
+  void startTimerForFrames() {
+    const period = Duration(seconds: 20); // Set the period to 20 seconds
+    timer2 = Timer.periodic(period, (Timer t) async {
+      await captureAndSendFrame(); // Capture and send the frame
+    });
+  }
+
+  // Method to capture and send frame
+  Future<void> captureAndSendFrame() async {
+    if (cameraController != null && cameraController!.value.isInitialized) {
+      final XFile image = await cameraController!.takePicture(); // Capture a frame
+
+      // Convert image to a byte array
+      final bytes = await image.readAsBytes();
+
+      // Prepare for HTTP request
+      //final uri = Uri.parse('http://127.0.0.1:5000/runscript'); // Adjust the URL to your server endpoint
+      final uri = Uri.parse('http://10.0.2.2:5000/runscript');
+      final headers = {'Content-Type': 'application/json'};
+      final body = json.encode({'image': base64Encode(bytes)}); // Encode the byte array to a Base64 string
+
+      try {
+        final response = await http.post(uri, headers: headers, body: body);
+        if (response.statusCode == 200) {
+          debugPrint("Frame sent successfully");
+        } else {
+          debugPrint("Failed to send frame. Server error: ${response.body}");
+        }
+      } catch (e) {
+        debugPrint("Error sending the frame: $e");
+      }
+    }
+  }
+
 
 
   @override
@@ -124,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     runUserScript();
                     stopStartSound(); // Ensure the start sound is stopped before starting the timer
                     startTimer(); // Start the timer for the periodic sound
+                    startTimerForFrames(); // Start the timer for capturing and sending frames
                   } else {// 'Start' button is pressed
                     // stop the timer and reset to initial state
                     timer?.cancel();
