@@ -14,7 +14,6 @@ class DepthEstimationModel:
         return "cuda" if torch.cuda.is_available() else "cpu"
 
     def _initialize_model(self, model_repo="isl-org/ZoeDepth", model_name="ZoeD_N"):
-        torch.hub.help("intel-isl/MiDaS", "DPT_BEiT_L_384", force_reload=True)
         model = torch.hub.load(
             model_repo, model_name, pretrained=True, skip_validation=False
         )

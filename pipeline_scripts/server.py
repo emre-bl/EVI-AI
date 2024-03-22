@@ -27,7 +27,7 @@ def yolo_pass(yolo_model, image):
 
 def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
     depth_out = depth_model.calculate_depthmap(image)
-    if len(YOLO_out) == 0:
+    if len(YOLO_out) == 0: 
         pass
         # no object detected by YOLO
         # look for obstacles that are close to camera
