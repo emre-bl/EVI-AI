@@ -3,7 +3,7 @@ import threading
 import cv2
 from ultralytics import YOLO
 from langchain_community.llms import Ollama
-from depth_model import DepthModel
+from DepthModel2 import DepthEstimationModel
 
 # TODO: IMPORT FROM RELATIVE PATH
 from ultralytics_YOLOs import *
@@ -19,7 +19,7 @@ for l,w in zip(angles,directions):
 yolo_model = YOLO("../YOLO_scripts/yolov5s.pt") # small YOLOv5 for
 LLM_model = Ollama(model="llama2")
 
-depth_model = DepthModel()
+depth_model = DepthEstimationModel()
 
 def yolo_pass(yolo_model, image):
     return get_angle_label_id_and_bboxes(yolo_model, image)
