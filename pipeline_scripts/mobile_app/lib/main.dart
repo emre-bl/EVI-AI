@@ -53,8 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraController? cameraController;
   int counter = 0;
 
-  /*Future<void> runUserScript() async {
-    final uri = Uri.parse('http://127.0.0.1:5000//runscript');
+  Future<void> runUserScript() async {
+    final uri = Uri.parse('http://10.3.67.107:5000/runscript');
     //final uri = Uri.parse('http://10.0.2.2:5000/runscript');
     try {
       final response = await http.get(uri);
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // Handle any errors that occur during the request
       debugPrint("Error making the request: $e");
     }
-  }*/
+  }
 
   // Method to capture and send frame
   Future<void> captureAndSendFrame() async {
@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.2.136.209:5000/process_image');
+      Uri uri = Uri.parse('http://10.3.67.107:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -183,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ifStarted = !ifStarted; // Toggle the state
                   if (ifStarted) {// 'Stop' button is pressed
                     // stop the start sound and start the timer
-                    //runUserScript();
+                    runUserScript();
                     stopStartSound(); // Ensure the start sound is stopped before starting the timer
                     startTimer(); // Start the timer for the periodic sound
                     startTimerForFrames(); // Start the timer for capturing and sending frames

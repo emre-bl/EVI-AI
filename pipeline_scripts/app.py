@@ -34,21 +34,19 @@ def process_image():
     else:
         return jsonify({'error': 'Request must be JSON'}), 400
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-
-
-"""app = Flask(__name__)
 
 @app.route('/runscript', methods=['GET'])
 def run_script():
     try:
         # Replace 'python' with 'python3' if required by your environment
-        result = subprocess.run(['python', 'C:/GitHub/EVI-AI/pipeline_scripts/user.py'], stdout=subprocess.PIPE, text=True, check=True)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(script_dir, 'user.py')  # Ensure 'user.py' is in the same directory
+        result = subprocess.run(['python', script_path], stdout=subprocess.PIPE, text=True, check=True)
         output = result.stdout
         return jsonify({'success': True, 'output': output}), 200
     except subprocess.CalledProcessError as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)"""
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
