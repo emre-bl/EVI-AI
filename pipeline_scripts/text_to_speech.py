@@ -9,5 +9,5 @@ def text_to_speech(text, lang='tr'):
     playsound("pipeline_scripts/mobile_app/assets/LLM_output.mp3")
 
 
-user_input = "sağa dönün"
-text_to_speech(user_input, lang='tr')
+"""user_input = "sağa dönün"
+text_to_speech(user_input, lang='tr')"""

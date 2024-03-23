@@ -7,11 +7,11 @@ import os
 
 # TODO: IMPORT FROM RELATIVE PATH
 from image_sender import *
+from text_to_speech import text_to_speech
 
 # Define server address and port
 SERVER_HOST = '0.0.0.0'  # Change this to the server's IP address
 SERVER_PORT = 12345
-
 
 def read_saved_image(image_path):
     img = cv2.imread(image_path)
@@ -47,6 +47,9 @@ def main():
 
                         response_json_dict = get_data(client_socket)
                         print(response_json_dict)
+
+                        LLM_out = response_json_dict["data"]
+                        text_to_speech(LLM_out, lang='tr')
 
                         closed = process_data(response_json_dict)
                         if closed:
