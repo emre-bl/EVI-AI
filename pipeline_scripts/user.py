@@ -48,12 +48,12 @@ def main():
                         response_json_dict = get_data(client_socket)
                         print(response_json_dict)
 
-                        LLM_out = response_json_dict["data"]
-                        text_to_speech(LLM_out, lang='tr')
-
                         closed = process_data(response_json_dict)
                         if closed:
                             break
+                        
+                        LLM_out = response_json_dict["data"]
+                        text_to_speech(LLM_out, lang='tr')
             except OSError:
                 print("Image file not found. Waiting for the file...")
             

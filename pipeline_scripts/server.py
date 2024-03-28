@@ -3,7 +3,7 @@ import threading
 import cv2
 from ultralytics import YOLO
 from langchain_community.llms import Ollama
-from DepthModel2 import DepthEstimationModel
+from DepthModel import DepthEstimationModel
 
 # TODO: IMPORT FROM RELATIVE PATH
 from ultralytics_YOLOs import *
