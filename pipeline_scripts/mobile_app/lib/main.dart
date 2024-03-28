@@ -54,8 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int counter = 0;
 
   Future<void> runUserScript() async {
-    final uri = Uri.parse('http://10.3.67.107:5000/runscript');
-    //final uri = Uri.parse('http://10.0.2.2:5000/runscript');
+    final uri = Uri.parse('http://127.0.0.1:5000/runscript');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -90,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.3.67.107:5000/process_image');
+      Uri uri = Uri.parse('http://127.0.0.1:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
