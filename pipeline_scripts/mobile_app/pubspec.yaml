@@ -66,6 +66,7 @@ flutter:
   assets:
       - assets/LLM_output.mp3
       - assets/start_sound.mp3
+      - assets/first_out.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

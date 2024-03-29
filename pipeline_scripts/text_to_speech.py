@@ -10,5 +10,5 @@ def text_to_speech(text, lang='en'):
     #playsound("/mobile_app/assets/LLM_output.mp3")
 
 
-user_input = "Checking for obstacles"
-text_to_speech(user_input, lang='en')
+"""user_input = "Checking for obstacles. Be cautious!"
+text_to_speech(user_input, lang='en')"""

@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int counter = 0;
 
   Future<void> runUserScript() async {
-    final uri = Uri.parse('http://10.2.133.245:5000/runscript');
+    final uri = Uri.parse('http://10.2.136.45:5000/runscript');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.2.133.245:5000/process_image');
+      Uri uri = Uri.parse('http://10.2.136.45:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -143,7 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void startTimer() {
-    timer = Timer.periodic(Duration(seconds: 5), (Timer t) async {
+    const dur = Duration(seconds: 20);
+    timer = Timer.periodic(dur, (Timer t) async {
       await audioPlayer.play(AssetSource('LLM_output.mp3'));
     });
   }
@@ -153,15 +154,27 @@ class _MyHomePageState extends State<MyHomePage> {
     timer?.cancel();
     timer2?.cancel();
     audioPlayer.dispose();
-    //cameraController?.dispose();
+    cameraController?.dispose();
     super.dispose();
   }
 
   void startTimerForFrames() {
-    const period = Duration(seconds: 10); // Set the period to 20 seconds
+    const period = Duration(seconds: 20);
     timer2 = Timer.periodic(period, (Timer t) async {
       await captureAndSendFrame(); // Capture and send the frame
     });
+  }
+
+
+  void playStopSound() async {
+    try {
+      await audioPlayer.stop(); // Ensure the player is stopped before playing another sound.
+      await audioPlayer.release(); // Release the resources used by the player.
+      audioPlayer = AudioPlayer(); // Create a new instance of the player.
+      await audioPlayer.play(AssetSource('first_out.mp3'));
+    } catch (e) {
+      debugPrint("Error playing stop sound: $e");
+    }
   }
 
 
@@ -173,9 +186,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: SizedBox.expand( // This will expand to fill all the available space
+        child: SizedBox.expand( // Expand button to fill all the available space
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // Add some padding around the button
+            padding: const EdgeInsets.all(16.0), 
             child: ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -186,6 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     stopStartSound(); // Ensure the start sound is stopped before starting the timer
                     startTimer(); // Start the timer for the periodic sound
                     startTimerForFrames(); // Start the timer for capturing and sending frames
+                    playStopSound(); // Play the stop sound once when the button is pressed
                   } else {// 'Start' button is pressed
                     // stop the timer and reset to initial state
                     timer?.cancel();
@@ -196,15 +210,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, double.infinity), // Set the button size to as big as its parent allows
+                minimumSize: const Size(double.infinity, double.infinity), // Set the button size to as big as its parent allows
                 elevation: 0, // Removes elevation shadow
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero), // Removes rounded borders
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero), // Removes rounded borders
                 // If you want to have no visual difference when the button is pressed:
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Removes additional space for the ink splash
               ),
               child: Text(
                 ifStarted ? 'Stop' : 'Start',
-                style: TextStyle(fontSize: 48),
+                style: const TextStyle(fontSize: 48),
               ),
             ),
           ),
