@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:path_provider/path_provider.dart';
 //import 'package:path/path.dart' as path;
 
@@ -53,8 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraController? cameraController;
   int counter = 0;
 
-  Future<void> runUserScript() async {
-    final uri = Uri.parse('http://10.2.136.45:5000/runscript');
+  /*Future<void> runUserScript() async {
+    final uri = Uri.parse('http://10.5.64.197:5000/runscript');
     try {
       final response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -70,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // Handle any errors that occur during the request
       debugPrint("Error making the request: $e");
     }
-  }
+  }*/
 
   // Method to capture and send frame
   Future<void> captureAndSendFrame() async {
@@ -89,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.2.136.45:5000/process_image');
+      Uri uri = Uri.parse('http://10.2.141.3:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -107,6 +108,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // Function to fetch LLM_out from the Flask server
+  Future<String> fetchLLMOut() async {
+    final response = await http.get(Uri.parse('http://10.2.141.3:5000/get_llm_output'));
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
+      return json.decode(response.body)['LLM_out'];
+    } else {
+      // If the server did not return a 200 OK response,
+      // throw an exception.
+      throw Exception('Failed to load LLM_out');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -119,7 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     audioPlayer.onPlayerComplete.listen((event) {
       if (allowPlayStartSound) { // Only replay start sound if 'Stop' button is not pressed
-        playStartSound();
+        Timer(const Duration(seconds: 5), playStartSound); // Wait for 5 seconds before playing the sound again
+        //playStartSound();
       }
     });
     playStartSound(); // Play the start sound immediately on app start
@@ -128,6 +144,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void playStartSound() async {
     if (!ifStarted) {
       await audioPlayer.play(AssetSource('start_sound.mp3'));
+      // Set a Timer to play the sound again after 5 seconds, only if allowed
+      /*Timer(const Duration(seconds: 5), () {
+        if (allowPlayStartSound) {
+          playStartSound();
+        }
+      });*/
     }
   }
 
@@ -138,14 +160,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void playSound() async {
     if (!shouldPlayStartSound) {
-      await audioPlayer.play(AssetSource('LLM_output.mp3')); // Your periodic sound file
+      FlutterTts flutterTts = FlutterTts();
+      String llmOut = await fetchLLMOut();
+      flutterTts.speak(llmOut);
+      //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     }
   }
 
   void startTimer() {
     const dur = Duration(seconds: 20);
     timer = Timer.periodic(dur, (Timer t) async {
-      await audioPlayer.play(AssetSource('LLM_output.mp3'));
+      FlutterTts flutterTts = FlutterTts();
+      String llmOut = await fetchLLMOut();
+      flutterTts.speak(llmOut);
+      //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     });
   }
 
@@ -210,11 +238,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, double.infinity), // Set the button size to as big as its parent allows
-                elevation: 0, // Removes elevation shadow
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero), // Removes rounded borders
+                minimumSize: const Size(double.infinity, double.infinity),
+                elevation: 0,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                 // If you want to have no visual difference when the button is pressed:
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Removes additional space for the ink splash
+                //tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Removes additional space for the ink splash
               ),
               child: Text(
                 ifStarted ? 'Stop' : 'Start',

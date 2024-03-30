@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Flask server is running!"
+    return "Flask server is running without problems."
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
@@ -35,6 +35,21 @@ def process_image():
         return jsonify({'error': 'Request must be JSON'}), 400
 
 
+@app.route('/get_llm_output', methods=['GET'])
+def get_llm_output():
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(script_dir + '/llm_output.txt', 'r') as file:
+            llm_output = file.read()
+        return jsonify({'LLM_out': llm_output}), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'LLM_out not found'}), 404
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
+
 """@app.route('/runscript', methods=['GET'])
 def run_script():
     try:
@@ -46,7 +61,3 @@ def run_script():
         return jsonify({'success': True, 'output': output}), 200
     except subprocess.CalledProcessError as e:
         return jsonify({'success': False, 'error': str(e)}), 400"""
-
-if __name__ == '__main__':
-    app.run(host='10.2.136.45', port=5000, debug=True)
-
