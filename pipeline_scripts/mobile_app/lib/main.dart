@@ -163,18 +163,17 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!shouldPlayStartSound) {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
-      await flutterTts.setLanguage("en-US");
+      flutterTts.setLanguage("en-US");
       flutterTts.speak(llmOut);
       //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     }
   }
 
   void startTimer() {
-    const dur = Duration(seconds: 20);
-    timer = Timer.periodic(dur, (Timer t) async {
+    timer = Timer.periodic(const Duration(seconds: 20), (Timer t) async {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
-      await flutterTts.setLanguage("en-US");
+      flutterTts.setLanguage("en-US");
       flutterTts.speak(llmOut);
       //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     });
@@ -190,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void startTimerForFrames() {
-    const period = Duration(seconds: 20);
+    const period = Duration(seconds: 15);
     timer2 = Timer.periodic(period, (Timer t) async {
       await captureAndSendFrame(); // Capture and send the frame
     });
