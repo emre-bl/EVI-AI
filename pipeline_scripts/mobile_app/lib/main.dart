@@ -163,6 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!shouldPlayStartSound) {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
+      await flutterTts.setLanguage("en-US");
       flutterTts.speak(llmOut);
       //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     }
@@ -173,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
     timer = Timer.periodic(dur, (Timer t) async {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
+      await flutterTts.setLanguage("en-US");
       flutterTts.speak(llmOut);
       //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     });
