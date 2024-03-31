@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.3.192.236:5000/process_image');
+      Uri uri = Uri.parse('http://10.3.64.242:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -98,8 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
       if (response.statusCode == 200) {
-        debugPrint('Image uploaded successfully. $counter');
-        counter += 1;
+        debugPrint('Image uploaded successfully.');
       } else {
         debugPrint('Failed to upload image. Status code: ${response.statusCode}. Response body: ${response.body}');
       }
@@ -110,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Function to fetch LLM_out from the Flask server
   Future<String> fetchLLMOut() async {
-    final response = await http.get(Uri.parse('http://10.3.192.236:5000/get_llm_output'));
+    final response = await http.get(Uri.parse('http://10.3.64.242:5000/get_llm_output'));
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
@@ -159,23 +158,29 @@ class _MyHomePageState extends State<MyHomePage> {
     allowPlayStartSound = false;
   }
 
-  void playSound() async {
+  void playSound() async {//////////////////////fix timing
     if (!shouldPlayStartSound) {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
       flutterTts.setLanguage("en-US");
       flutterTts.speak(llmOut);
-      //await audioPlayer.play(AssetSource('LLM_output.mp3'));
     }
   }
 
   void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 20), (Timer t) async {
+    timer = Timer.periodic(const Duration(seconds: 10), (Timer t) async {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
       flutterTts.setLanguage("en-US");
-      flutterTts.speak(llmOut);
-      //await audioPlayer.play(AssetSource('LLM_output.mp3'));
+      String textToSpeech = llmOut.substring(0, llmOut.length - 2);
+      int llmCounter = int.parse(llmOut.substring(llmOut.length-1, llmOut.length));
+      if (llmCounter > counter) {
+        flutterTts.speak(textToSpeech);
+        counter += 1;
+      }
+      else {
+        flutterTts.speak("Checking for obstacles. Move forward with caution.");
+      }
     });
   }
 
@@ -229,6 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     stopStartSound(); // Ensure the start sound is stopped before starting the timer
                     startTimer(); // Start the timer for the periodic sound
                     startTimerForFrames(); // Start the timer for capturing and sending frames
+                    captureAndSendFrame(); // Capture and send the first frame on second 0
                     playStopSound(); // Play the stop sound once when the button is pressed
                   } else {// 'Start' button is pressed
                     // stop the timer and reset to initial state

@@ -27,6 +27,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     image_path = os.path.join(script_dir, 'received_image.jpg')
     last_mod_time = None  # Track the last modification time of the image
+    counter = 0
 
     try:
         while True:
@@ -50,10 +51,10 @@ def main():
                             break
                         
                         LLM_out = response_json_dict["data"] # Get LLM output
-                        
+                        counter += 1
                         script_dir = os.path.dirname(os.path.abspath(__file__))
                         with open(script_dir + '/llm_output.txt', 'w') as file: # Save LLM output to a text file
-                            file.write(LLM_out)
+                            file.write(LLM_out + f',{counter}')
 
             except OSError:
                 print("Image file not found. Waiting for the file...")

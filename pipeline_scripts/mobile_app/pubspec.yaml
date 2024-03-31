@@ -37,8 +37,8 @@ dependencies:
   http: ^1.2.0
   audioplayers: ^5.2.1
   camera: ^0.10.5+9
-  #path_provider: ^2.0.9
-  #path: ^1.8.0
+  path_provider: ^2.0.9
+  path: ^1.8.0
   flutter_tts: ^3.2.0
 
 dev_dependencies:
