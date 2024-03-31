@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.2.141.3:5000/process_image');
+      Uri uri = Uri.parse('http://10.3.192.236:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -110,10 +110,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Function to fetch LLM_out from the Flask server
   Future<String> fetchLLMOut() async {
-    final response = await http.get(Uri.parse('http://10.2.141.3:5000/get_llm_output'));
+    final response = await http.get(Uri.parse('http://10.3.192.236:5000/get_llm_output'));
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
+      debugPrint('LLM_out: ${json.decode(response.body)['LLM_out']}');
       return json.decode(response.body)['LLM_out'];
     } else {
       // If the server did not return a 200 OK response,
