@@ -7,6 +7,7 @@ import base64
 import os
 
 app = Flask(__name__)
+#last_mode_time = None
 
 @app.route('/')
 def home():
@@ -39,8 +40,11 @@ def process_image():
 def get_llm_output():
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        with open(script_dir + '/llm_output.txt', 'r') as file:
+        txt_path= os.path.join(script_dir, 'llm_output.txt')
+
+        with open(txt_path, 'r') as file:
             llm_output = file.read()
+            
         return jsonify({'LLM_out': llm_output}), 200
     except FileNotFoundError:
         return jsonify({'error': 'LLM_out not found'}), 404
@@ -48,16 +52,3 @@ def get_llm_output():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
-
-"""@app.route('/runscript', methods=['GET'])
-def run_script():
-    try:
-        # Replace 'python' with 'python3' if required by your environment
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, 'user.py')  # Ensure 'user.py' is in the same directory
-        result = subprocess.run(['python', script_path], stdout=subprocess.PIPE, text=True, check=True)
-        output = result.stdout
-        return jsonify({'success': True, 'output': output}), 200
-    except subprocess.CalledProcessError as e:
-        return jsonify({'success': False, 'error': str(e)}), 400"""

@@ -54,25 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraController? cameraController;
   int counter = 0;
 
-  /*Future<void> runUserScript() async {
-    final uri = Uri.parse('http://10.5.64.197:5000/runscript');
-    try {
-      final response = await http.get(uri);
-      if (response.statusCode == 200) {
-        // Successfully executed the script
-        final data = jsonDecode(response.body);
-        debugPrint("Script is running ${data['output']}");
-        // You can update your UI or state based on the script output
-      } else {
-        // Handle server errors
-        debugPrint("Failed to execute script. Server error: ${response.body}");
-      }
-    } catch (e) {
-      // Handle any errors that occur during the request
-      debugPrint("Error making the request: $e");
-    }
-  }*/
-
   // Method to capture and send frame
   Future<void> captureAndSendFrame() async {
     if (!cameraController!.value.isInitialized) {
@@ -90,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       String base64Image = base64Encode(imageBytes);
 
       // Send to your Flask server as a POST request
-      Uri uri = Uri.parse('http://10.3.64.242:5000/process_image');
+      Uri uri = Uri.parse('http://10.3.64.198:5000/process_image');
       var response = await http.post(
         uri,
         headers: {"Content-Type": "application/json"},
@@ -109,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Function to fetch LLM_out from the Flask server
   Future<String> fetchLLMOut() async {
-    final response = await http.get(Uri.parse('http://10.3.64.242:5000/get_llm_output'));
+    final response = await http.get(Uri.parse('http://10.3.64.198:5000/get_llm_output'));
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
@@ -144,12 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void playStartSound() async {
     if (!ifStarted) {
       await audioPlayer.play(AssetSource('start_sound.mp3'));
-      // Set a Timer to play the sound again after 5 seconds, only if allowed
-      /*Timer(const Duration(seconds: 5), () {
-        if (allowPlayStartSound) {
-          playStartSound();
-        }
-      });*/
     }
   }
 
@@ -158,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
     allowPlayStartSound = false;
   }
 
-  void playSound() async {//////////////////////fix timing
+  void playSound() async {
     if (!shouldPlayStartSound) {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
@@ -168,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 10), (Timer t) async {
+    timer = Timer.periodic(const Duration(seconds: 5), (Timer t) async {
       FlutterTts flutterTts = FlutterTts();
       String llmOut = await fetchLLMOut();
       flutterTts.setLanguage("en-US");
@@ -177,9 +152,6 @@ class _MyHomePageState extends State<MyHomePage> {
       if (llmCounter > counter) {
         flutterTts.speak(textToSpeech);
         counter += 1;
-      }
-      else {
-        flutterTts.speak("Checking for obstacles. Move forward with caution.");
       }
     });
   }
@@ -239,6 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   } else {// 'Start' button is pressed
                     // stop the timer and reset to initial state
                     timer?.cancel();
+                    timer2?.cancel();
                     shouldPlayStartSound = true;
                     allowPlayStartSound = true;
                     playStartSound(); // play the start sound again

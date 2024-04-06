@@ -29,6 +29,11 @@ def main():
     last_mod_time = None  # Track the last modification time of the image
     counter = 0
 
+    # Clear the LLM output file from the last run if exists
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(script_dir + '/llm_output.txt', 'w') as file:
+        file.write("")  # Clear
+
     try:
         while True:
             # Check if the image file has been updated
