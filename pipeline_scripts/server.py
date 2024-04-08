@@ -37,7 +37,7 @@ def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
                 # get the angle of the column
                 angle = (i*column_width + (i+1)*column_width) // 2
                 return min_value, angle, None
-        return None
+        return []
 
         # no object detected by YOLO
         # look for obstacles that are close to camera
