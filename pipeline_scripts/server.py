@@ -104,7 +104,11 @@ def generate_prompt(model_out):
 
 # Function to pass vision models output to LLM API
 def LLM_pass(LLM_model, prompt):
-    return LLM_model(prompt)
+    if prompt == "no obstacle detected, go forward":
+        LLM_out = prompt
+    else:
+        LLM_out = LLM_model(prompt)
+    return LLM_out
 
 
 # Define server address and port
@@ -132,11 +136,8 @@ def handle_client(client_socket, client_address):
         YOLO_and_DEPTH_out = [(7, 40, 0, "Tree"), (2, -25, 1, "Car")]
         
         prompt = generate_prompt(YOLO_and_DEPTH_out)
-        print(prompt, flush=True)
-        if prompt == "no obstacle detected, go forward":
-            LLM_out = prompt
-        else:
-            LLM_out = LLM_pass(LLM_model, prompt)
+
+        LLM_out = LLM_pass(LLM_model, prompt)
 
         closed = send_data(client_socket, LLM_out, end=1)
         if closed:
