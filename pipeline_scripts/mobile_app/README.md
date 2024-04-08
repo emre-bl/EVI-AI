@@ -1,16 +1,34 @@
-# mobile_app
+# Mobile Application of EVI-AI
 
-A new Flutter project.
+This app aims to send the user audio responses that is extracted from the LLM model which sends caution messages if an obstacle is encountered that can be detected from phone camera.
 
-## Getting Started
+# Build APK
 
-This project is a starting point for a Flutter application.
+- Clone the repository
+  ```bash
+  git clone https://github.com/emre-bl/EVI-AI.git
+  ```
 
-A few resources to get you started if this is your first Flutter project:
+- Install dependencies  
+  ```bash
+  pip install -r requirements.txt
+  ```  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Go to directory  
+  ```bash
+  cd pipeline_scripts/mobile_app
+  ```  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Run the commands below
+  ```bash
+  flutter clean
+  ```  
+  ```bash
+  flutter pub get
+  ```  
+  ```bash
+  flutter build apk
+  ```  
+  ```bash
+  adb install path/to/your/app-release.apk
+  ```  
