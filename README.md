@@ -16,7 +16,7 @@ The main components of this project include:
 
 ### Prerequisites
 - Python 3  
-- FLutter
+- Flutter
 - Jupyter Notebook
 
 ### Installation
