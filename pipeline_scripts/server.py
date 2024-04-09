@@ -27,7 +27,10 @@ def yolo_pass(yolo_model, image):
 
 def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
     depth_out = depth_model.calculate_depthmap(image)
+    close_objects= []
+
     if len(YOLO_out) == 0: 
+        
         depth_map_middle = depth_out[depth_out.shape[0]//3:2*depth_out.shape[0]//3, :]
         column_width = depth_map_middle.shape[1] // 5
         for i in range(5):
@@ -36,8 +39,8 @@ def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
             if min_value < 5: # 5 metreden daha yakın bir şey varsa
                 # get the angle of the column
                 angle = (i*column_width + (i+1)*column_width) // 2
-                return min_value, angle, None
-        return []
+                close_objects.append((min_value, angle, 0, "Table"))
+        return close_objects
 
         # no object detected by YOLO
         # look for obstacles that are close to camera
@@ -46,8 +49,6 @@ def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
         # get the mask/bounding box of objects and calculate the distance
         # return the informations of objects that are closer than closeness_threshold
         # return format is depth, angle, id, label --> (7, 40, id=2, "Table")
-        close_objects = []
-
         for i, (angle_label_id, bbox) in enumerate(zip(YOLO_out, bboxes)):
             center_x = (bbox[0][0] + bbox[1][0]) // 2
             center_y = (bbox[0][1] + bbox[1][1]) // 2
