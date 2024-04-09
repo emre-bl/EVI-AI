@@ -67,7 +67,8 @@ The main components of this project include:
 
 ## Usage  
 
-- TODO add structural image and explain  
+- To be the server: first run app.py, then run server.py, lastly run user.py
+- To be the client: build and run the APK
 
 ## Contributors
 
