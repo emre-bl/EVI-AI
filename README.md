@@ -1,69 +1,76 @@
 # EVI-AI  
-Eyes for the Visually Impaired  
+## Eyes for the Visually Impaired  
 
-# TÜRKÇE:  
-YOLO KISMI  
+This project aims to assist individuals with visual impairments in their daily activities. It employs an application that uses the mobile phone's camera to identify objects and gauge their distances. The app then leverages a Large Language Model (LLM) to interpret the findings from the YOLO (You Only Look Once) object detection and ZoeDepth perception models. This information is converted into audio commands, guiding users to navigate their environment more effectively.  
 
-1 YOLO local image'lerden çalıştırılacak  
-2 YOLO local videodan opencv ile frame okuyarak çalıştırılacak  
-3 YOLO local videodan gstreamer ile frame okuyarak çalıştırılacak  
+## Project Overview
 
-RBG2Depth KISMI  
+The main components of this project include:  
 
-4 RGB2Depth modelleri denenecek en iyisi bulunacak  
-5 RGB2D modeli local image'lerden çalıştırılacak  
-6 RGB2D modeli local videodan gstreamer ile frame okuyarak çalıştırılacak  
+- A mobile application written in Flutter  
+- A YOLO object detection model  
+- A ZoeDepth detection model  
+- A llama2 LLM model  
 
-7 YOLO ve RGB2D modeli birlikte çalıştırılacak  
-8 modellerin çıktıları rapordaki gibi formatlanacak  
+### Project Flow
+![pipeline](https://github.com/emre-bl/EVI-AI/assets/105359055/c6755702-0b7c-442a-83f3-564bbb13e46b)
 
-LLM KISMI  
+#### APK flow
+![APK](https://github.com/emre-bl/EVI-AI/assets/105359055/b0e182aa-1e3e-4212-905a-b563e84b8636)
 
-9 örnek çıktılarla prompt denemeleri yapılacak   
-10 LLM için OpenAI, Langchain, LLaMA gibi API'lar ve kütüphaneler test edilecek  
-11 LLMden alınan çıktılar değerlendirilip en uygun çözüm projeye eklenecek  
+#### app flow
+![app_py png](https://github.com/emre-bl/EVI-AI/assets/105359055/3ecb45de-5cf4-41a7-8566-4e9212a117a3)
 
+#### user flow
+![user_py](https://github.com/emre-bl/EVI-AI/assets/105359055/98b2e9d4-d4d9-4f31-baaf-2733ec600490)
 
-YOLO, RBG2Depth VE LLM kısımları ayrı başlarına istenilen şekilde koşturulabildikten sonra, önce YOLO ve RBG2Depth kısmı onlardan sonra da LLM kısmı ortak çalışacak şekilde birleştirilecek ve raporda bahsedilen arkada çalışacak olan bilgisayar üzerindeki işlemler tamamlanmış olacaktır.   
+#### server flow
+![server_py](https://github.com/emre-bl/EVI-AI/assets/105359055/d0ccfef9-c278-488f-a1d7-6a2594469259)
 
-Bundan sonra LLM'den alınan metin çıktısını telefona göndermek için websocket kurulumu ile basit işleyen bir sistem ayarlanacaktır. Ve istenilen şekilde çalıştığı görüldükten sonra telefonun text-to-speech işlemi kullanılarak Bilgisayardan gönderilen metni işitsel geri dönüş olarak iletme kısmı tamamlanacaktır.  
+## Getting Started  
 
-Telefondan bilgisayara görüntü gönderme kısmı için önce kablolu bağlantılarla denemeler yapılıp elimizdeki sistemin çalışabilirliğini test edilecektir. Bütün kurulum tek bir sistem içerisinde çalışabilir hale geldiğinde kablosuz bağlantı ile görüntü gönderimi tamamlanıp sistem optimizasyonlarına başlanılacaktır.  
+### Prerequisites
+- Python 3  
+- Flutter
+- Jupyter Notebook
 
-Mobil Uygulama Backend Bağlantısı  
+### Installation
 
-12 Butona basıldığında user.py çalıştırmalı  
-13 text to speech, chatgpt'den alınan son response direkt olarak uygulamadan ses ile iletilmeli  
+- Clone the repository
+  ```bash
+  git clone https://github.com/emre-bl/EVI-AI.git
+  ```
 
-# ENGLISH:  
-YOLO PART  
+- Install dependencies
+  ```bash
+  pip install -r requirements.txt
+  ```  
 
-1 YOLO will be run from local images  
-2 YOLO will be run by reading frames from local video with opencv  
-3 YOLO will be run by reading frames from local video with gstreamer  
+- Go to mobile app's directory  
+  ```bash
+  cd pipeline_scripts/mobile_app
+  ```  
 
-RBG2Depth PART  
+- Run the commands below
+  ```bash
+  flutter clean
+  ```  
+  ```bash
+  flutter pub get
+  ```  
+  ```bash
+  flutter build apk
+  ```  
+  ```bash
+  adb install path/to/your/app-release.apk
+  ```  
 
-4 RGB2Depth models will be tried and the best one will be found  
-5 RGB2D model will be run from local images   
-6 RGB2D model will be run by reading frame from local video with gstreamer  
+## Usage
 
-7 YOLO and RGB2D model will be run together  
-8 outputs of the models will be formatted as in the report  
+- TODO add structural image and explain
 
-LLM PART  
+## Contributors
 
-9 prompt trials will be done with sample outputs  
-10 APIs and libraries such as OpenAI, Langchain, LLaMA will be tested for LLM  
-11 The outputs from LLM will be evaluated and the most appropriate solution will be added to the project  
-
-After the YOLO, RBG2Depth and LLM parts can be run separately as desired, first the YOLO and RBG2Depth parts will be combined to work together and then the LLM part will be combined to work together and the operations on the computer that will work in the back mentioned in the report will be completed.  
-
-After that, a simple working system will be set up with websocket setup to send the text output from the LLM to the phone. And after it is seen that it works as desired, the part of transmitting the text sent from the computer as auditory feedback will be completed by using the text-to-speech operation of the phone.  
-
-For the part of sending images from the phone to the computer, we will first test the operability of the system we have by experimenting with wired connections. When the whole installation becomes operable in a single system, image sending will be completed with wireless connection and system optimisations will be started.  
-
-Mobile App Backend Connection  
-
-12 App should be running user.oy when Start button is pressed  
-13 The last response from LLM must send it to application and with text to speech, the app should run the audio in real time
+- [Emre Belikırık](https://github.com/emre-bl)
+- [Meriç Demirörs](https://github.com/mericdemirors)
+- [Zeynep Meriç Aşık](https://github.com/meric2)

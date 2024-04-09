@@ -7,7 +7,7 @@ import os
 from image_sender import *
 
 # Define server address and port
-SERVER_HOST = '0.0.0.0'  # Change this to the server's IP address
+SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 12345
 
 def read_saved_image(image_path):

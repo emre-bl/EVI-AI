@@ -6,8 +6,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_tts/flutter_tts.dart';
-//import 'package:path_provider/path_provider.dart';
-//import 'package:path/path.dart' as path;
 
 List<CameraDescription> cameras = [];
 
@@ -70,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
       List<int> imageBytes = await imgFile.readAsBytes();
       String base64Image = base64Encode(imageBytes);
 
-      // Send to your Flask server as a POST request
+      // Send to Flask server as a POST request
       Uri uri = Uri.parse('http://10.3.64.198:5000/process_image');
       var response = await http.post(
         uri,
@@ -97,8 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint('LLM_out: ${json.decode(response.body)['LLM_out']}');
       return json.decode(response.body)['LLM_out'];
     } else {
-      // If the server did not return a 200 OK response,
-      // throw an exception.
+      // Response not OK
       throw Exception('Failed to load LLM_out');
     }
   }
@@ -107,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     // Initialize camera controller
-    cameraController = CameraController(cameras[0], ResolutionPreset.medium); // Initialize camera controller
+    cameraController = CameraController(cameras[0], ResolutionPreset.medium);
     cameraController!.initialize().then((_) {
       if (!mounted) return;
       setState(() {}); // When the camera is initialized, rebuild the widget
@@ -116,7 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
     audioPlayer.onPlayerComplete.listen((event) {
       if (allowPlayStartSound) { // Only replay start sound if 'Stop' button is not pressed
         Timer(const Duration(seconds: 5), playStartSound); // Wait for 5 seconds before playing the sound again
-        //playStartSound();
       }
     });
     playStartSound(); // Play the start sound immediately on app start
@@ -133,15 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
     allowPlayStartSound = false;
   }
 
-  void playSound() async {
-    if (!shouldPlayStartSound) {
-      FlutterTts flutterTts = FlutterTts();
-      String llmOut = await fetchLLMOut();
-      flutterTts.setLanguage("en-US");
-      flutterTts.speak(llmOut);
-    }
-  }
-
+  // Play LLM sounf if updated
   void startTimer() {
     timer = Timer.periodic(const Duration(seconds: 5), (Timer t) async {
       FlutterTts flutterTts = FlutterTts();
@@ -165,14 +153,15 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  // Every 15 seconds, capture and send frame from phone camera
   void startTimerForFrames() {
     const period = Duration(seconds: 15);
     timer2 = Timer.periodic(period, (Timer t) async {
-      await captureAndSendFrame(); // Capture and send the frame
+      await captureAndSendFrame();
     });
   }
 
-
+  // When the app is started play an initial sound
   void playStopSound() async {
     try {
       await audioPlayer.stop(); // Ensure the player is stopped before playing another sound.
@@ -202,7 +191,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ifStarted = !ifStarted; // Toggle the state
                   if (ifStarted) {// 'Stop' button is pressed
                     // stop the start sound and start the timer
-                    //runUserScript();
                     stopStartSound(); // Ensure the start sound is stopped before starting the timer
                     startTimer(); // Start the timer for the periodic sound
                     startTimerForFrames(); // Start the timer for capturing and sending frames
@@ -222,8 +210,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 minimumSize: const Size(double.infinity, double.infinity),
                 elevation: 0,
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                // If you want to have no visual difference when the button is pressed:
-                //tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Removes additional space for the ink splash
               ),
               child: Text(
                 ifStarted ? 'Stop' : 'Start',
