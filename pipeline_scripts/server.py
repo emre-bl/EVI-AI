@@ -30,14 +30,15 @@ def depth_pass(depth_model, image, YOLO_out, bboxes, closeness_threshold):
     if len(YOLO_out) == 0: 
         depth_map_middle = depth_out[depth_out.shape[0]//3:2*depth_out.shape[0]//3, :]
         column_width = depth_map_middle.shape[1] // 5
+        objects = []
         for i in range(5):
             column = depth_map_middle[:, i*column_width:(i+1)*column_width]
             min_value = np.min(column)
             if min_value < 5: # 5 metreden daha yakın bir şey varsa
                 # get the angle of the column
                 angle = (i*column_width + (i+1)*column_width) // 2
-                return min_value, angle, None
-        return []
+                objects.append((min_value, angle, i))
+        return objects
 
         # no object detected by YOLO
         # look for obstacles that are close to camera
@@ -69,7 +70,7 @@ def send_image_to_models(image):
     """
     YOLO_out, bboxes = yolo_pass(yolo_model, image)
     
-    merged_out = depth_pass(depth_model, image, YOLO_out, bboxes, 0.7)
+    merged_out = depth_pass(depth_model, image, YOLO_out, bboxes, 7)
     return merged_out
     
 # generates prompt by merging infos from models outputs
@@ -132,9 +133,7 @@ def handle_client(client_socket, client_address):
         #cv2.waitKey(1)
 
         YOLO_and_DEPTH_out = send_image_to_models(image)
-        
-        YOLO_and_DEPTH_out = [(7, 40, 0, "Tree"), (2, -25, 1, "Car")]
-        
+                
         prompt = generate_prompt(YOLO_and_DEPTH_out)
 
         LLM_out = LLM_pass(LLM_model, prompt)
