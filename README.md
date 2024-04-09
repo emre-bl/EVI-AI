@@ -10,7 +10,22 @@ The main components of this project include:
 - A mobile application written in Flutter  
 - A YOLO object detection model  
 - A ZoeDepth detection model  
-- A LAMA LLM model  
+- A llama2 LLM model  
+
+### Project Flow
+![pipeline](https://github.com/emre-bl/EVI-AI/assets/105359055/c6755702-0b7c-442a-83f3-564bbb13e46b)
+
+#### APK flow
+![APK](https://github.com/emre-bl/EVI-AI/assets/105359055/b0e182aa-1e3e-4212-905a-b563e84b8636)
+
+#### app flow
+![app_py png](https://github.com/emre-bl/EVI-AI/assets/105359055/3ecb45de-5cf4-41a7-8566-4e9212a117a3)
+
+#### user flow
+![user_py](https://github.com/emre-bl/EVI-AI/assets/105359055/98b2e9d4-d4d9-4f31-baaf-2733ec600490)
+
+#### server flow
+![server_py](https://github.com/emre-bl/EVI-AI/assets/105359055/d0ccfef9-c278-488f-a1d7-6a2594469259)
 
 ## Getting Started  
 
